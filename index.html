@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Speak Up! · 회화 중심 영문법 인터랙티브 학습</title>
+<style>
+  :root{
+    --bg:#0f1220; --bg2:#171a2e; --card:#1b1f38; --card2:#232848;
+    --line:#2c3157; --txt:#eef1ff; --mut:#9aa2c8; --muted2:#6f77a3;
+    --acc:#6c8bff; --acc2:#8a6cff; --good:#3ecf8e; --bad:#ff6b81; --warn:#ffcf5c;
+    --shadow:0 10px 40px rgba(0,0,0,.35);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#eef1fb; --bg2:#e4e8f7; --card:#ffffff; --card2:#f3f5ff;
+      --line:#dfe3f5; --txt:#1a1e35; --mut:#5b628a; --muted2:#8991b8;
+      --acc:#4a68e8; --acc2:#7a5cff; --good:#1fa971; --bad:#e5485f; --warn:#c98a12;
+      --shadow:0 10px 40px rgba(60,70,120,.15);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:linear-gradient(160deg,var(--bg),var(--bg2));
+    color:var(--txt); min-height:100vh; -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:20px 16px 90px}
+  header.top{display:flex;align-items:center;gap:12px;padding:8px 0 18px}
+  .logo{
+    width:44px;height:44px;border-radius:13px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--acc),var(--acc2));
+    display:grid;place-items:center;font-size:22px;box-shadow:var(--shadow);
+  }
+  .brand h1{font-size:20px;margin:0;letter-spacing:-.3px}
+  .brand p{margin:0;color:var(--mut);font-size:12.5px}
+  .prog-wrap{margin-left:auto;text-align:right;min-width:120px}
+  .prog-bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:5px}
+  .prog-fill{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--acc));transition:width .5s}
+  .prog-wrap small{color:var(--mut);font-size:11.5px}
+
+  /* HOME */
+  .hero{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 20px;margin-bottom:18px;box-shadow:var(--shadow)
+  }
+  .hero h2{margin:0 0 6px;font-size:17px}
+  .hero p{margin:0;color:var(--mut);font-size:13.5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .unit-card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:15px 15px 14px;cursor:pointer;position:relative;overflow:hidden;
+    transition:transform .12s ease,border-color .12s ease;
+  }
+  .unit-card:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .unit-card .num{font-size:12px;color:var(--muted2);font-weight:700;letter-spacing:1px}
+  .unit-card h3{margin:6px 0 3px;font-size:16px}
+  .unit-card .en{color:var(--mut);font-size:12.5px;margin:0 0 10px}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;
+    background:var(--card2);color:var(--acc);border:1px solid var(--line)}
+  .done-dot{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;
+    background:var(--good);display:none;place-items:center;color:#fff;font-size:12px}
+  .unit-card.done .done-dot{display:grid}
+  .unit-card .mini{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--good);transition:width .4s}
+
+  /* UNIT VIEW */
+  .back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--acc);
+    font-size:14px;cursor:pointer;padding:6px 0;margin-bottom:6px;font-weight:600}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px}
+  .tab{background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:99px;
+    padding:8px 15px;font-size:13px;cursor:pointer;font-weight:600;transition:all .12s}
+  .tab.active{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-color:transparent}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .box h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .box .lead{color:var(--txt);font-size:14.5px}
+  .kv{color:var(--mut);font-size:13.5px}
+
+  .pat{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px dashed var(--line)}
+  .pat:first-of-type{border-top:none}
+  .pat .p-en{font-weight:700;font-size:15px}
+  .pat .p-ko{color:var(--mut);font-size:13px}
+
+  .ex-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
+  .ex-row:first-of-type{border-top:none}
+  .ex-row .ex-txt{flex:1}
+  .ex-row .ex-en{font-size:15px;font-weight:600}
+  .ex-row .ex-ko{color:var(--mut);font-size:13px}
+  .say{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);
+    background:var(--card2);color:var(--acc);cursor:pointer;font-size:17px;display:grid;place-items:center;transition:all .12s}
+  .say:hover{background:var(--acc);color:#fff}
+  .say:active{transform:scale(.92)}
+
+  .dlg{display:flex;gap:10px;margin:12px 0}
+  .dlg .who{flex:0 0 42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px}
+  .dlg.a .who{background:linear-gradient(135deg,var(--acc),#4a68e8)}
+  .dlg.b .who{background:linear-gradient(135deg,var(--acc2),#b06cff)}
+  .bubble{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 13px;flex:1}
+  .bubble .b-en{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .bubble .b-ko{color:var(--mut);font-size:12.5px;margin-top:2px}
+  .bubble .say{width:32px;height:32px;font-size:15px}
+
+  /* QUIZ */
+  .q{margin-bottom:16px}
+  .q .q-txt{font-weight:600;font-size:15px;margin-bottom:10px}
+  .q .q-txt .blank{color:var(--acc);font-weight:800}
+  .opt{display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);
+    color:var(--txt);border-radius:11px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:14px;
+    transition:all .12s;font-family:inherit}
+  .opt:hover{border-color:var(--acc)}
+  .opt.correct{background:rgba(62,207,142,.15);border-color:var(--good);color:var(--good);font-weight:700}
+  .opt.wrong{background:rgba(255,107,129,.13);border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .explain{font-size:13px;color:var(--mut);margin-top:6px;padding:9px 12px;background:var(--card2);
+    border-left:3px solid var(--acc);border-radius:8px;display:none}
+  .explain.show{display:block}
+  .quiz-done{text-align:center;padding:16px;font-size:15px}
+  .quiz-done .score{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--good),var(--acc));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+  /* SPEAK */
+  .speak-card{text-align:center;padding:22px 18px}
+  .speak-target{font-size:20px;font-weight:700;margin:6px 0 4px}
+  .speak-ko{color:var(--mut);font-size:13.5px;margin-bottom:16px}
+  .mic{width:78px;height:78px;border-radius:50%;border:none;cursor:pointer;font-size:32px;color:#fff;
+    background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:var(--shadow);transition:transform .12s}
+  .mic:active{transform:scale(.9)}
+  .mic.rec{animation:pulse 1s infinite;background:linear-gradient(135deg,var(--bad),#ff4d6d)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,107,129,.5)}70%{box-shadow:0 0 0 22px rgba(255,107,129,0)}100%{box-shadow:0 0 0 0 rgba(255,107,129,0)}}
+  .heard{margin-top:16px;min-height:26px;font-size:15px}
+  .heard b{color:var(--txt)}
+  .speak-nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+  .btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:11px;
+    padding:10px 16px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:all .12s}
+  .btn:hover{border-color:var(--acc)}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-color:transparent}
+  .btn:disabled{opacity:.4;cursor:default}
+  .match-good{color:var(--good);font-weight:700}
+  .match-bad{color:var(--bad)}
+  .hint{font-size:12px;color:var(--muted2);margin-top:12px}
+
+  .done-btn{display:block;width:100%;margin-top:6px;padding:13px;border-radius:13px;border:none;
+    background:linear-gradient(135deg,var(--good),var(--acc));color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .footer-note{text-align:center;color:var(--muted2);font-size:11.5px;margin-top:24px;line-height:1.7}
+  .diff{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  @media(max-width:520px){.wrap{padding:16px 12px 80px}.prog-wrap{min-width:96px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">🗣️</div>
+    <div class="brand">
+      <h1>Speak Up!</h1>
+      <p>회화 중심 영문법 인터랙티브 학습</p>
+    </div>
+    <div class="prog-wrap">
+      <small><span id="doneCount">0</span> / <span id="totalCount">0</span> 완료</small>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <div class="footer-note">
+    Grammar in Use Intermediate 커리큘럼 구성을 참고한 오리지널 학습 콘텐츠 ·
+    발음 듣기 🔊 와 말하기 🎤 는 브라우저 음성 기능을 사용합니다 (Chrome 권장)
+  </div>
+</div>
+
+<script>
+/* ---------------- 학습 데이터 (회화 중심 15유닛) ---------------- */
+const UNITS = [
+ {
+  id:"u1", tag:"현재시제", title:"지금 하는 중이야", en:"I'm doing (현재진행)",
+  intro:"지금 이 순간 진행 중인 일을 말할 때 <b>am/is/are + -ing</b> 를 씁니다. 'What are you doing?'(뭐 해?)은 회화에서 매일 쓰는 표현이에요.",
+  patterns:[
+   {en:"I'm + ~ing", ko:"나 지금 ~하는 중이야"},
+   {en:"Are you + ~ing?", ko:"너 ~하고 있어?"},
+   {en:"He/She isn't + ~ing", ko:"그/그녀는 ~하고 있지 않아"}
+  ],
+  examples:[
+   {en:"I'm cooking dinner right now.", ko:"나 지금 저녁 요리하는 중이야."},
+   {en:"What are you doing this weekend?", ko:"이번 주말에 뭐 해?"},
+   {en:"She's not listening to me.", ko:"걔 내 말 안 듣고 있어."},
+   {en:"We're waiting for the bus.", ko:"우리 버스 기다리는 중이야."}
+  ],
+  dialogue:[
+   {w:"A",en:"Hey! What are you doing?",ko:"안녕! 뭐 하고 있어?"},
+   {w:"B",en:"I'm making coffee. Do you want some?",ko:"커피 만들고 있어. 좀 마실래?"},
+   {w:"A",en:"Yes, please. I'm dying for a cup.",ko:"응, 부탁해. 한 잔이 너무 간절해."},
+   {w:"B",en:"Coming right up!",ko:"바로 갈게(만들게)!"}
+  ],
+  quiz:[
+   {q:"Look! It ___ outside.", opts:["rains","is raining","rain"], a:1, ex:"지금 눈앞에서 벌어지는 일 → is raining."},
+   {q:"\"뭐 하고 있어?\" 를 영어로?", opts:["What do you do?","What are you doing?","What you doing now?"], a:1, ex:"진행 중 행동은 be+~ing. (What do you do?는 직업을 묻는 말)"},
+   {q:"They ___ TV at the moment.", opts:["are watching","watch","watches"], a:0, ex:"at the moment(지금) → 진행형."}
+  ],
+  speak:["I'm cooking dinner.","What are you doing?","We're waiting for the bus.","I'm learning English."]
+ },
+ {
+  id:"u2", tag:"현재시제", title:"평소에 하는 일", en:"I do (현재단순)",
+  intro:"습관, 반복되는 일, 일반적 사실은 <b>현재단순형</b>을 씁니다. 주어가 he/she/it이면 동사에 <b>-s</b>를 붙여요. 자기소개·일상 대화의 기본!",
+  patterns:[
+   {en:"I / You / We + 동사", ko:"나/너/우리는 ~한다"},
+   {en:"He / She + 동사-s", ko:"그/그녀는 ~한다"},
+   {en:"Do you ~? / Does he ~?", ko:"너 ~하니? / 그는 ~하니?"}
+  ],
+  examples:[
+   {en:"I work at a design studio.", ko:"나는 디자인 스튜디오에서 일해."},
+   {en:"She drinks tea every morning.", ko:"그녀는 매일 아침 차를 마셔."},
+   {en:"Do you like spicy food?", ko:"매운 음식 좋아해?"},
+   {en:"He doesn't eat meat.", ko:"그는 고기를 안 먹어."}
+  ],
+  dialogue:[
+   {w:"A",en:"So, what do you do?",ko:"그래서, 무슨 일 하세요?"},
+   {w:"B",en:"I teach math at a high school. How about you?",ko:"고등학교에서 수학 가르쳐요. 당신은요?"},
+   {w:"A",en:"I work from home. I design apps.",ko:"저는 재택근무해요. 앱을 디자인하죠."},
+   {w:"B",en:"That sounds interesting!",ko:"흥미롭네요!"}
+  ],
+  quiz:[
+   {q:"She ___ to work by subway.", opts:["go","goes","going"], a:1, ex:"주어 She → 동사에 -s (goes)."},
+   {q:"부정: He ___ coffee.", opts:["doesn't drink","don't drinks","not drink"], a:0, ex:"3인칭 부정은 doesn't + 동사원형."},
+   {q:"\"매운 거 좋아해?\"", opts:["Do you like spicy food?","Are you like spicy food?","You like spicy food?"], a:0, ex:"일반동사 의문문은 Do you + 동사원형."}
+  ],
+  speak:["I work from home.","She drinks tea every morning.","Do you like spicy food?","He doesn't eat meat."]
+ },
+ {
+  id:"u3", tag:"완료시제", title:"해본 적 있어 / 방금 했어", en:"I have done (현재완료)",
+  intro:"<b>have/has + 과거분사(p.p.)</b>. 경험('~해본 적 있다'), 방금 끝난 일('막 ~했다'), 지금까지의 결과를 말할 때 씁니다. 회화에서 <b>ever, never, just, already, yet</b>과 자주 짝지어요.",
+  patterns:[
+   {en:"Have you ever + p.p.?", ko:"~해본 적 있어?"},
+   {en:"I've just + p.p.", ko:"나 방금 ~했어"},
+   {en:"I haven't + p.p. + yet", ko:"아직 ~안 했어"}
+  ],
+  examples:[
+   {en:"Have you ever been to Japan?", ko:"일본 가본 적 있어?"},
+   {en:"I've just finished my homework.", ko:"나 방금 숙제 끝냈어."},
+   {en:"She has never eaten sushi.", ko:"그녀는 초밥을 먹어본 적이 없어."},
+   {en:"I haven't decided yet.", ko:"아직 못 정했어."}
+  ],
+  dialogue:[
+   {w:"A",en:"Have you seen the new Marvel movie?",ko:"새 마블 영화 봤어?"},
+   {w:"B",en:"No, I haven't seen it yet. Is it good?",ko:"아니, 아직 못 봤어. 재밌어?"},
+   {w:"A",en:"It's amazing! I've already watched it twice.",ko:"완전 대박이야! 나 벌써 두 번 봤어."},
+   {w:"B",en:"Wow, let's go this weekend!",ko:"와, 이번 주말에 가자!"}
+  ],
+  quiz:[
+   {q:"___ you ever ___ to Paris?", opts:["Did / been","Have / been","Have / went"], a:1, ex:"경험은 Have + p.p.(been). went는 과거형이라 X."},
+   {q:"I've ___ finished. (방금)", opts:["yet","just","ever"], a:1, ex:"'방금'은 just. yet은 부정·의문에서 '아직'."},
+   {q:"She has ___ eaten sushi. (전혀)", opts:["never","ever","already"], a:0, ex:"'한 번도 ~없다'는 never."}
+  ],
+  speak:["Have you ever been to Japan?","I've just finished my homework.","I haven't decided yet.","She has never eaten sushi."]
+ },
+ {
+  id:"u4", tag:"과거시제", title:"어제 뭐 했어", en:"I did (과거단순)",
+  intro:"이미 끝난 과거의 일은 <b>과거형</b>으로. 규칙동사는 <b>-ed</b>, 불규칙동사는 형태가 바뀝니다(go→went, eat→ate). 의문·부정은 <b>did</b>를 써요.",
+  patterns:[
+   {en:"I + 과거형", ko:"나 ~했어"},
+   {en:"Did you + 동사원형?", ko:"너 ~했어?"},
+   {en:"I didn't + 동사원형", ko:"나 ~안 했어"}
+  ],
+  examples:[
+   {en:"I watched a movie last night.", ko:"나 어젯밤에 영화 봤어."},
+   {en:"Did you sleep well?", ko:"잘 잤어?"},
+   {en:"We went to the beach yesterday.", ko:"우리 어제 바다에 갔어."},
+   {en:"I didn't have time.", ko:"나 시간이 없었어."}
+  ],
+  dialogue:[
+   {w:"A",en:"How was your weekend?",ko:"주말 어땠어?"},
+   {w:"B",en:"It was great! I visited my grandparents.",ko:"좋았어! 조부모님 뵈러 갔어."},
+   {w:"A",en:"Nice. Did you do anything else?",ko:"좋네. 다른 것도 했어?"},
+   {w:"B",en:"We cooked together and played cards.",ko:"같이 요리하고 카드 게임 했어."}
+  ],
+  quiz:[
+   {q:"We ___ to the beach yesterday.", opts:["go","went","gone"], a:1, ex:"go의 과거형은 went (불규칙)."},
+   {q:"___ you sleep well?", opts:["Did","Do","Have"], a:0, ex:"과거 의문문은 Did + 주어 + 동사원형."},
+   {q:"I ___ have time. (부정)", opts:["didn't","don't","wasn't"], a:0, ex:"일반동사 과거 부정은 didn't + 동사원형."}
+  ],
+  speak:["I watched a movie last night.","Did you sleep well?","We went to the beach yesterday.","I didn't have time."]
+ },
+ {
+  id:"u5", tag:"미래시제", title:"~할 거야", en:"will / be going to (미래)",
+  intro:"미래는 두 가지! <b>will</b>은 지금 즉흥적으로 정한 결정·약속·예측, <b>be going to</b>는 이미 정해둔 계획을 말할 때 씁니다.",
+  patterns:[
+   {en:"I'll + 동사원형", ko:"(방금 결정) 내가 ~할게"},
+   {en:"I'm going to + 동사원형", ko:"(계획) ~할 예정이야"},
+   {en:"Will you + 동사원형?", ko:"~해줄래?"}
+  ],
+  examples:[
+   {en:"I'll call you later.", ko:"이따 전화할게."},
+   {en:"I'm going to travel next month.", ko:"다음 달에 여행 갈 거야."},
+   {en:"It's going to rain.", ko:"비 올 것 같아.(먹구름을 보며)"},
+   {en:"Will you help me?", ko:"나 좀 도와줄래?"}
+  ],
+  dialogue:[
+   {w:"A",en:"I'm going to start a new job next week.",ko:"다음 주에 새 직장 시작할 거야."},
+   {w:"B",en:"Congratulations! That's exciting.",ko:"축하해! 신나겠다."},
+   {w:"A",en:"Thanks. I'm a bit nervous, though.",ko:"고마워. 근데 좀 긴장돼."},
+   {w:"B",en:"Don't worry, you'll do great!",ko:"걱정 마, 잘할 거야!"}
+  ],
+  quiz:[
+   {q:"(계획해둔 여행) I ___ travel next month.", opts:["will","am going to","go"], a:1, ex:"미리 정한 계획 → be going to."},
+   {q:"(방금 결정) The phone's ringing. I ___ get it.", opts:["'ll","'m going to","will to"], a:0, ex:"즉흥 결정 → will (I'll)."},
+   {q:"Look at those clouds! It ___ rain.", opts:["will","is going to","would"], a:1, ex:"눈앞의 증거로 하는 예측 → be going to."}
+  ],
+  speak:["I'll call you later.","I'm going to travel next month.","Will you help me?","You'll do great!"]
+ },
+ {
+  id:"u6", tag:"조동사", title:"부탁·제안하기", en:"Can / Could / Would you...?",
+  intro:"회화에서 정말 자주 쓰는 <b>정중한 부탁과 제안</b>. <b>Could you</b>가 <b>Can you</b>보다 더 공손하고, <b>Would you like...?</b>는 '~하시겠어요?' 하고 권할 때 씁니다.",
+  patterns:[
+   {en:"Could you + 동사원형?", ko:"~해주시겠어요? (정중)"},
+   {en:"Can I + 동사원형?", ko:"~해도 될까요?"},
+   {en:"Would you like + 명사/to~?", ko:"~하시겠어요? / 드릴까요?"}
+  ],
+  examples:[
+   {en:"Could you say that again, please?", ko:"다시 한 번 말씀해 주시겠어요?"},
+   {en:"Can I have the menu?", ko:"메뉴 좀 주시겠어요?"},
+   {en:"Would you like something to drink?", ko:"뭐 좀 마시겠어요?"},
+   {en:"Would you mind opening the window?", ko:"창문 좀 열어주시겠어요?"}
+  ],
+  dialogue:[
+   {w:"A",en:"Excuse me, could you help me?",ko:"실례합니다, 좀 도와주시겠어요?"},
+   {w:"B",en:"Of course. What do you need?",ko:"물론이죠. 뭐가 필요하세요?"},
+   {w:"A",en:"Can you tell me how to get to the station?",ko:"역까지 가는 길 좀 알려주시겠어요?"},
+   {w:"B",en:"Sure. Go straight and turn left.",ko:"네. 직진하다가 왼쪽으로 도세요."}
+  ],
+  quiz:[
+   {q:"(가장 정중) ___ you pass me the salt?", opts:["Could","Do","Are"], a:0, ex:"Could you ~ 가 가장 공손한 부탁."},
+   {q:"손님에게 음료 권하기: Would you like ___?", opts:["drink something","something to drink","to drink something to"], a:1, ex:"something to drink = 마실 것."},
+   {q:"\"이거 만져도 돼요?\"", opts:["Can I touch this?","Do I touch this?","Will I touch this?"], a:0, ex:"허락을 구할 땐 Can I ~?"}
+  ],
+  speak:["Could you say that again, please?","Can I have the menu?","Would you like something to drink?","Could you help me?"]
+ },
+ {
+  id:"u7", tag:"조동사", title:"해야 해 / 하면 안 돼", en:"must / have to (의무)",
+  intro:"<b>have to / must</b>는 '~해야 한다'(의무). 부정이 중요해요! <b>don't have to</b>는 '안 해도 된다(불필요)', <b>mustn't</b>는 '하면 안 된다(금지)' — 뜻이 완전히 달라요.",
+  patterns:[
+   {en:"I have to + 동사원형", ko:"나 ~해야 해"},
+   {en:"You don't have to ~", ko:"~안 해도 돼 (불필요)"},
+   {en:"You mustn't ~", ko:"~하면 안 돼 (금지)"}
+  ],
+  examples:[
+   {en:"I have to go now.", ko:"나 이제 가야 해."},
+   {en:"You don't have to pay. It's free.", ko:"돈 안 내도 돼. 무료야."},
+   {en:"You mustn't be late tomorrow.", ko:"내일 늦으면 절대 안 돼."},
+   {en:"Do I have to wear a suit?", ko:"정장 입어야 하나요?"}
+  ],
+  dialogue:[
+   {w:"A",en:"Do we have to finish this today?",ko:"이거 오늘 끝내야 해?"},
+   {w:"B",en:"No, you don't have to. Tomorrow is fine.",ko:"아니, 안 그래도 돼. 내일까지면 돼."},
+   {w:"A",en:"Oh good. But I mustn't forget the meeting.",ko:"다행이다. 근데 회의는 잊으면 안 돼."},
+   {w:"B",en:"Right, that's at 3 p.m.",ko:"맞아, 그거 오후 3시야."}
+  ],
+  quiz:[
+   {q:"입장 무료야. 너 ___ pay.", opts:["mustn't","don't have to","have to"], a:1, ex:"'안 내도 된다(불필요)' → don't have to."},
+   {q:"위험해! 저 버튼 ___ press.", opts:["don't have to","mustn't","have to"], a:1, ex:"'절대 하면 안 된다(금지)' → mustn't."},
+   {q:"나 지금 가야 해.", opts:["I have to go","I have go","I must to go"], a:0, ex:"have to + 동사원형 (to 뒤 원형)."}
+  ],
+  speak:["I have to go now.","You don't have to pay.","You mustn't be late.","Do I have to wear a suit?"]
+ },
+ {
+  id:"u8", tag:"조동사", title:"~하는 게 좋겠어", en:"should / had better (조언)",
+  intro:"<b>should</b>는 '~하는 게 좋겠다'는 조언·의견. <b>had better ('d better)</b>는 '안 그러면 문제 생긴다'는 더 강한 경고. 상대에게 조언할 때 정말 유용해요.",
+  patterns:[
+   {en:"You should + 동사원형", ko:"너 ~하는 게 좋겠어"},
+   {en:"You shouldn't + 동사원형", ko:"~하지 않는 게 좋겠어"},
+   {en:"You'd better + 동사원형", ko:"~하는 게 좋을 거야 (경고)"}
+  ],
+  examples:[
+   {en:"You should see a doctor.", ko:"너 병원 가보는 게 좋겠어."},
+   {en:"You shouldn't work so hard.", ko:"너무 무리하지 마."},
+   {en:"I think you should apologize.", ko:"내 생각엔 네가 사과하는 게 좋겠어."},
+   {en:"We'd better hurry, or we'll miss the train.", ko:"서두르는 게 좋겠어, 안 그럼 기차 놓쳐."}
+  ],
+  dialogue:[
+   {w:"A",en:"I have a terrible headache.",ko:"머리가 너무 아파."},
+   {w:"B",en:"You should get some rest.",ko:"좀 쉬는 게 좋겠어."},
+   {w:"A",en:"Maybe you're right.",ko:"네 말이 맞는 것 같아."},
+   {w:"B",en:"And you shouldn't stare at your phone so much.",ko:"그리고 폰 그만 좀 봐."}
+  ],
+  quiz:[
+   {q:"아파 보여. 너 ___ see a doctor.", opts:["should","must to","had"], a:0, ex:"조언 → should + 동사원형."},
+   {q:"기차 놓치겠어! We ___ hurry.", opts:["should not","'d better","don't have to"], a:1, ex:"강한 경고 → 'd better(had better)."},
+   {q:"과로하지 마: You ___ work so hard.", opts:["shouldn't","should","must"], a:0, ex:"~안 하는 게 좋다 → shouldn't."}
+  ],
+  speak:["You should see a doctor.","You shouldn't work so hard.","I think you should apologize.","We'd better hurry."]
+ },
+ {
+  id:"u9", tag:"가정법", title:"만약에 ~하면", en:"if (조건문)",
+  intro:"<b>if</b> 조건문. 현실 가능한 일은 <b>If + 현재, will</b> (1형식). 상상·가정은 <b>If + 과거, would</b> (2형식). 회화에서 조언·상상·제안에 두루 쓰여요.",
+  patterns:[
+   {en:"If + 현재, ... will ~", ko:"~하면, …할 거야 (현실)"},
+   {en:"If + 과거, ... would ~", ko:"~라면, …할 텐데 (상상)"},
+   {en:"What would you do if ~?", ko:"~라면 넌 어떻게 할래?"}
+  ],
+  examples:[
+   {en:"If it rains, I'll stay home.", ko:"비 오면 집에 있을래."},
+   {en:"If I had more money, I would travel the world.", ko:"돈이 더 있다면 세계여행 할 텐데."},
+   {en:"What would you do if you won the lottery?", ko:"복권 당첨되면 뭐 할래?"},
+   {en:"If you heat ice, it melts.", ko:"얼음을 데우면 녹아. (일반 사실)"}
+  ],
+  dialogue:[
+   {w:"A",en:"If you could live anywhere, where would you go?",ko:"어디든 살 수 있다면 어디로 갈래?"},
+   {w:"B",en:"I'd move to Italy. What about you?",ko:"난 이탈리아로 갈래. 넌?"},
+   {w:"A",en:"If I had the chance, I'd live by the sea.",ko:"기회가 되면 바닷가에 살고 싶어."},
+   {w:"B",en:"That sounds like a dream.",ko:"꿈 같은 얘기네."}
+  ],
+  quiz:[
+   {q:"(현실) If it ___, I'll take an umbrella.", opts:["rains","would rain","rained"], a:0, ex:"현실 조건은 If + 현재, will."},
+   {q:"(상상) If I ___ rich, I would help everyone.", opts:["am","were","will be"], a:1, ex:"상상은 If + 과거(were), would."},
+   {q:"복권 당첨되면 뭐 할래? What ___ you do if you won?", opts:["will","would","do"], a:1, ex:"가정(2형식) → would."}
+  ],
+  speak:["If it rains, I'll stay home.","If I had more money, I would travel.","What would you do if you won the lottery?","I'd move to Italy."]
+ },
+ {
+  id:"u10", tag:"표현", title:"예전엔 ~했었지", en:"used to (과거 습관)",
+  intro:"<b>used to + 동사원형</b>은 '예전엔 ~했지만 지금은 안 한다'는 과거의 습관·상태. 추억이나 변화를 이야기할 때 자연스럽게 써요.",
+  patterns:[
+   {en:"I used to + 동사원형", ko:"예전엔 ~하곤 했어"},
+   {en:"I didn't use to ~", ko:"예전엔 ~안 했어"},
+   {en:"Did you use to ~?", ko:"예전엔 ~했었어?"}
+  ],
+  examples:[
+   {en:"I used to play the piano.", ko:"예전엔 피아노 쳤었어."},
+   {en:"She used to live in Busan.", ko:"그녀는 예전에 부산에 살았어."},
+   {en:"I didn't use to like coffee.", ko:"예전엔 커피 안 좋아했어."},
+   {en:"Did you use to have long hair?", ko:"너 예전엔 머리 길었어?"}
+  ],
+  dialogue:[
+   {w:"A",en:"You're so good at swimming!",ko:"너 수영 진짜 잘한다!"},
+   {w:"B",en:"Thanks. I used to swim every day as a kid.",ko:"고마워. 어릴 때 매일 수영했었어."},
+   {w:"A",en:"Really? I used to be scared of water.",ko:"정말? 난 예전엔 물을 무서워했어."},
+   {w:"B",en:"I can teach you if you want!",ko:"원하면 내가 가르쳐 줄게!"}
+  ],
+  quiz:[
+   {q:"예전엔 피아노 쳤어: I ___ play the piano.", opts:["use to","used to","am used to"], a:1, ex:"과거 습관 → used to + 동사원형."},
+   {q:"부정: I ___ like coffee.", opts:["didn't used to","didn't use to","don't use to"], a:1, ex:"부정·의문은 use to (d 빠짐)."},
+   {q:"질문: ___ you use to have long hair?", opts:["Did","Do","Were"], a:0, ex:"Did + 주어 + use to ~?"}
+  ],
+  speak:["I used to play the piano.","She used to live in Busan.","I didn't use to like coffee.","Did you use to have long hair?"]
+ },
+ {
+  id:"u11", tag:"동사구", title:"~하는 걸 좋아해", en:"verb + -ing / to (동명사·부정사)",
+  intro:"동사 뒤에 또 동사가 올 때! <b>enjoy, finish, mind</b> 뒤엔 <b>-ing</b>, <b>want, need, decide, hope</b> 뒤엔 <b>to + 동사원형</b>. <b>like, love</b>는 둘 다 OK.",
+  patterns:[
+   {en:"enjoy / finish + ~ing", ko:"~하는 걸 즐기다/끝내다"},
+   {en:"want / need / decide + to ~", ko:"~하기를 원하다/필요하다/결정하다"},
+   {en:"like / love + ~ing / to ~", ko:"~하는 걸 좋아하다 (둘 다 가능)"}
+  ],
+  examples:[
+   {en:"I enjoy cooking on weekends.", ko:"주말에 요리하는 걸 즐겨."},
+   {en:"I want to learn Spanish.", ko:"스페인어 배우고 싶어."},
+   {en:"She decided to quit her job.", ko:"그녀는 일을 그만두기로 했어."},
+   {en:"Do you mind waiting a minute?", ko:"잠깐 기다려 주시겠어요?"}
+  ],
+  dialogue:[
+   {w:"A",en:"What do you like doing in your free time?",ko:"여가 시간에 뭐 하는 거 좋아해?"},
+   {w:"B",en:"I enjoy hiking and reading. You?",ko:"등산이랑 독서 즐겨. 넌?"},
+   {w:"A",en:"I want to start painting this year.",ko:"올해 그림 그리기 시작하고 싶어."},
+   {w:"B",en:"That's a great idea!",ko:"완전 좋은 생각이야!"}
+  ],
+  quiz:[
+   {q:"I enjoy ___ on weekends.", opts:["to cook","cooking","cook"], a:1, ex:"enjoy 뒤엔 -ing."},
+   {q:"I want ___ Spanish.", opts:["learning","to learn","learn"], a:1, ex:"want 뒤엔 to + 동사원형."},
+   {q:"She decided ___ her job.", opts:["quitting","to quit","quit"], a:1, ex:"decide 뒤엔 to부정사."}
+  ],
+  speak:["I enjoy cooking on weekends.","I want to learn Spanish.","She decided to quit her job.","Do you mind waiting a minute?"]
+ },
+ {
+  id:"u12", tag:"형용사", title:"더 ~해 / 가장 ~해", en:"comparatives (비교급·최상급)",
+  intro:"두 개를 비교할 땐 <b>비교급 + than</b> (짧은 말+er, 긴 말 more+형용사). 여럿 중 최고는 <b>the + 최상급</b>. 회화에서 취향·평가를 말할 때 필수!",
+  patterns:[
+   {en:"A is + 비교급 + than B", ko:"A가 B보다 더 ~해"},
+   {en:"the + 최상급", ko:"가장 ~한"},
+   {en:"as + 형용사 + as", ko:"~만큼 ~한"}
+  ],
+  examples:[
+   {en:"This café is cheaper than that one.", ko:"이 카페가 저기보다 싸."},
+   {en:"Today is more exciting than yesterday.", ko:"오늘이 어제보다 더 신나."},
+   {en:"It's the best movie I've ever seen.", ko:"내가 본 영화 중 최고야."},
+   {en:"He's as tall as his brother.", ko:"걔는 형만큼 키가 커."}
+  ],
+  dialogue:[
+   {w:"A",en:"Which phone should I buy?",ko:"어떤 폰 사야 할까?"},
+   {w:"B",en:"This one is more expensive, but it's faster.",ko:"이게 더 비싼데, 더 빨라."},
+   {w:"A",en:"Is it the best on the market?",ko:"시장에서 제일 좋은 거야?"},
+   {w:"B",en:"Pretty much. It has the best camera.",ko:"거의. 카메라가 제일 좋아."}
+  ],
+  quiz:[
+   {q:"This café is ___ than that one.", opts:["cheap","cheaper","cheapest"], a:1, ex:"둘 비교 → 비교급 cheaper + than."},
+   {q:"It's ___ movie I've ever seen.", opts:["the best","better","best"], a:0, ex:"최상급엔 the + best."},
+   {q:"Today is ___ than yesterday.", opts:["more exciting","excitinger","most exciting"], a:0, ex:"긴 형용사는 more + 형용사."}
+  ],
+  speak:["This café is cheaper than that one.","It's the best movie I've ever seen.","He's as tall as his brother.","Today is more exciting than yesterday."]
+ },
+ {
+  id:"u13", tag:"관사", title:"a / an / the 감 잡기", en:"articles (관사)",
+  intro:"<b>a/an</b>은 '(여러 개 중) 하나' 처음 언급할 때, <b>the</b>는 '바로 그것' 서로 아는 특정한 것. 모음 소리 앞엔 <b>an</b>. 한국어엔 없어서 헷갈리지만 감으로 익혀요!",
+  patterns:[
+   {en:"a / an + 처음 말하는 하나", ko:"어떤 (하나의) ~"},
+   {en:"the + 서로 아는 특정한 것", ko:"(바로 그) ~"},
+   {en:"관사 없이 + 일반적 복수/불가산", ko:"~들 (일반론)"}
+  ],
+  examples:[
+   {en:"I saw a dog. The dog was huge.", ko:"개 한 마리 봤어. 그 개 엄청 컸어."},
+   {en:"Can you close the door?", ko:"(그) 문 좀 닫아줄래?"},
+   {en:"She's an honest person.", ko:"그녀는 정직한 사람이야."},
+   {en:"I love coffee.", ko:"난 커피를 좋아해. (일반론, 관사X)"}
+  ],
+  dialogue:[
+   {w:"A",en:"I need a pen. Do you have one?",ko:"펜 하나 필요해. 있어?"},
+   {w:"B",en:"Yes, the pen on the desk is mine. Use it.",ko:"응, 책상 위 (그) 펜 내 거야. 써."},
+   {w:"A",en:"Thanks! You're a lifesaver.",ko:"고마워! 넌 생명의 은인이야."},
+   {w:"B",en:"No problem at all.",ko:"전혀 문제없어."}
+  ],
+  quiz:[
+   {q:"I saw ___ dog. ___ dog was huge.", opts:["a / The","the / A","a / A"], a:0, ex:"처음 언급 a, 다시 언급하면 the."},
+   {q:"She's ___ honest person.", opts:["a","an","the"], a:1, ex:"honest는 [ɑ] 모음 소리로 시작 → an."},
+   {q:"(일반론) I love ___.", opts:["a coffee","the coffee","coffee"], a:2, ex:"'커피 전반'을 말하면 관사 없이."}
+  ],
+  speak:["I saw a dog.","Can you close the door?","She's an honest person.","You're a lifesaver."]
+ },
+ {
+  id:"u14", tag:"전치사", title:"in / on / at 시간·장소", en:"prepositions (전치사)",
+  intro:"시간·장소 전치사! <b>at</b>=콕 찍은 지점(시각, at 7), <b>on</b>=면 위·특정 날(on Monday), <b>in</b>=넓은 범위·안(월/년/공간, in May). 규칙을 잡으면 회화가 확 자연스러워져요.",
+  patterns:[
+   {en:"at + 시각 / 지점", ko:"at 7, at the door"},
+   {en:"on + 요일·날짜 / 표면", ko:"on Monday, on the table"},
+   {en:"in + 월·년·공간", ko:"in May, in the room"}
+  ],
+  examples:[
+   {en:"Let's meet at 7 o'clock.", ko:"7시에 만나자."},
+   {en:"My birthday is on Friday.", ko:"내 생일은 금요일이야."},
+   {en:"I was born in 1998.", ko:"난 1998년에 태어났어."},
+   {en:"The keys are on the table.", ko:"열쇠는 탁자 위에 있어."}
+  ],
+  dialogue:[
+   {w:"A",en:"When is the meeting?",ko:"회의 언제야?"},
+   {w:"B",en:"It's on Monday at 10 a.m.",ko:"월요일 오전 10시야."},
+   {w:"A",en:"Where exactly?",ko:"정확히 어디서?"},
+   {w:"B",en:"In the conference room on the third floor.",ko:"3층 회의실에서."}
+  ],
+  quiz:[
+   {q:"Let's meet ___ 7 o'clock.", opts:["in","on","at"], a:2, ex:"정확한 시각 → at."},
+   {q:"My birthday is ___ Friday.", opts:["at","on","in"], a:1, ex:"요일 앞엔 on."},
+   {q:"I was born ___ 1998.", opts:["in","on","at"], a:0, ex:"연도·월 앞엔 in."}
+  ],
+  speak:["Let's meet at 7 o'clock.","My birthday is on Friday.","I was born in 1998.","The keys are on the table."]
+ },
+ {
+  id:"u15", tag:"구동사", title:"원어민이 쓰는 구동사", en:"phrasal verbs (구동사)",
+  intro:"<b>동사 + 부사/전치사</b>로 새 뜻이 되는 구동사! 원어민 일상 회화의 핵심이에요. get up(일어나다), give up(포기하다), look for(찾다)처럼 덩어리로 외우면 회화가 확 자연스러워집니다.",
+  patterns:[
+   {en:"get up / wake up", ko:"일어나다 / 잠에서 깨다"},
+   {en:"look for / find out", ko:"~을 찾다 / 알아내다"},
+   {en:"give up / turn on", ko:"포기하다 / (기기를) 켜다"}
+  ],
+  examples:[
+   {en:"I get up at 6 every day.", ko:"난 매일 6시에 일어나."},
+   {en:"I'm looking for my glasses.", ko:"내 안경 찾고 있어."},
+   {en:"Don't give up!", ko:"포기하지 마!"},
+   {en:"Can you turn on the light?", ko:"불 좀 켜줄래?"}
+  ],
+  dialogue:[
+   {w:"A",en:"You look tired. What time did you get up?",ko:"피곤해 보여. 몇 시에 일어났어?"},
+   {w:"B",en:"At 5. I couldn't find out why my alarm didn't ring.",ko:"5시에. 알람이 왜 안 울렸는지 못 알아냈어."},
+   {w:"A",en:"Oh no. You should turn it up louder.",ko:"저런. 소리를 더 키우는 게 좋겠어."},
+   {w:"B",en:"Good idea. I won't give up on being early!",ko:"좋은 생각이야. 일찍 일어나기 포기 안 할래!"}
+  ],
+  quiz:[
+   {q:"I ___ at 6 every morning. (일어나다)", opts:["get up","get on","get in"], a:0, ex:"일어나다 = get up."},
+   {q:"I'm ___ my keys. (찾는 중)", opts:["looking at","looking for","looking up"], a:1, ex:"~을 찾다 = look for."},
+   {q:"Please ___ the TV. (켜다)", opts:["turn on","turn up","turn into"], a:0, ex:"(기기) 켜다 = turn on."}
+  ],
+  speak:["I get up at 6 every day.","I'm looking for my glasses.","Don't give up!","Can you turn on the light?"]
+ }
+];
+
+/* ---------------- 상태 & 저장 ---------------- */
+const STORE_KEY = "speakup_progress_v1";
+let progress = {};
+try{ progress = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ progress = {}; }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(progress)); }catch(e){} }
+
+const app = document.getElementById("app");
+document.getElementById("totalCount").textContent = UNITS.length;
+
+function refreshProgress(){
+  const done = Object.keys(progress).filter(k=>progress[k]).length;
+  document.getElementById("doneCount").textContent = done;
+  document.getElementById("progFill").style.width = (done/UNITS.length*100)+"%";
+}
+
+/* ---------------- 음성: 듣기(TTS) ---------------- */
+let voices = [];
+function loadVoices(){ voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text, rate=0.95){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US"; u.rate = rate;
+  const v = voices.find(v=>/en-US/i.test(v.lang)) || voices.find(v=>/^en/i.test(v.lang));
+  if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+/* ---------------- 화면: 홈 ---------------- */
+function renderHome(){
+  refreshProgress();
+  let cards = UNITS.map((u,i)=>`
+    <div class="unit-card ${progress[u.id]?'done':''}" onclick="openUnit('${u.id}')">
+      <div class="done-dot">✓</div>
+      <div class="num">UNIT ${String(i+1).padStart(2,'0')}</div>
+      <h3>${u.title}</h3>
+      <p class="en">${u.en}</p>
+      <span class="tag">${u.tag}</span>
+      <div class="mini" style="width:${progress[u.id]?100:0}%"></div>
+    </div>`).join("");
+  app.innerHTML = `
+    <div class="hero">
+      <h2>👋 회화가 되는 영문법, 직접 말하며 배우기</h2>
+      <p>15개 유닛마다 <b>핵심 설명 → 예문 듣기 → 실전 대화 → 퀴즈 → 말하기 연습</b> 순서로 익혀요.
+      🔊 버튼으로 원어민 발음을 듣고, 🎤 로 직접 따라 말하면 발음까지 체크됩니다.</p>
+    </div>
+    <div class="grid">${cards}</div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------------- 화면: 유닛 ---------------- */
+function openUnit(id){
+  const u = UNITS.find(x=>x.id===id);
+  const idx = UNITS.findIndex(x=>x.id===id);
+  app.innerHTML = `
+    <button class="back" onclick="renderHome()">← 유닛 목록</button>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span class="tag">UNIT ${String(idx+1).padStart(2,'0')} · ${u.tag}</span>
+    </div>
+    <h2 style="margin:8px 0 2px;font-size:22px">${u.title}</h2>
+    <p style="margin:0 0 4px;color:var(--mut);font-size:14px">${u.en}</p>
+    <div class="tabs">
+      <button class="tab active" data-t="learn" onclick="switchTab(this)">📖 설명</button>
+      <button class="tab" data-t="ex" onclick="switchTab(this)">🔊 예문</button>
+      <button class="tab" data-t="dlg" onclick="switchTab(this)">💬 대화</button>
+      <button class="tab" data-t="quiz" onclick="switchTab(this)">✏️ 퀴즈</button>
+      <button class="tab" data-t="speak" onclick="switchTab(this)">🎤 말하기</button>
+    </div>
+    <div class="panel active" data-p="learn">${renderLearn(u)}</div>
+    <div class="panel" data-p="ex">${renderExamples(u)}</div>
+    <div class="panel" data-p="dlg">${renderDialogue(u)}</div>
+    <div class="panel" data-p="quiz">${renderQuiz(u)}</div>
+    <div class="panel" data-p="speak">${renderSpeak(u)}</div>
+  `;
+  window.__unit = u;
+  window.scrollTo(0,0);
+}
+
+function switchTab(btn){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  btn.classList.add("active");
+  const t = btn.dataset.t;
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.dataset.p===t));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderLearn(u){
+  const pats = u.patterns.map(p=>`
+    <div class="pat">
+      <div>
+        <div class="p-en">${p.en}</div>
+        <div class="p-ko">${p.ko}</div>
+      </div>
+    </div>`).join("");
+  return `
+    <div class="box">
+      <h3>💡 핵심 개념</h3>
+      <p class="lead">${u.intro}</p>
+    </div>
+    <div class="box">
+      <h3>🔑 핵심 패턴</h3>
+      ${pats}
+    </div>`;
+}
+
+function renderExamples(u){
+  const rows = u.examples.map(e=>`
+    <div class="ex-row">
+      <div class="ex-txt">
+        <div class="ex-en">${e.en}</div>
+        <div class="ex-ko">${e.ko}</div>
+      </div>
+      <button class="say" onclick="speak('${e.en.replace(/'/g,"\\'")}')" title="발음 듣기">🔊</button>
+    </div>`).join("");
+  return `<div class="box"><h3>🔊 예문 듣기</h3><p class="kv" style="margin:-4px 0 6px">🔊 를 눌러 원어민 발음을 들어보세요.</p>${rows}</div>`;
+}
+
+function renderDialogue(u){
+  const lines = u.dialogue.map(d=>`
+    <div class="dlg ${d.w==='A'?'a':'b'}">
+      <div class="who">${d.w}</div>
+      <div class="bubble">
+        <div class="b-en"><span>${d.en}</span><button class="say" onclick="speak('${d.en.replace(/'/g,"\\'")}')">🔊</button></div>
+        <div class="b-ko">${d.ko}</div>
+      </div>
+    </div>`).join("");
+  const full = u.dialogue.map(d=>d.en).join(" ... ");
+  return `
+    <div class="box">
+      <h3>💬 실전 대화</h3>
+      <p class="kv" style="margin:-4px 0 10px">이 표현이 실제 대화에서 어떻게 쓰이는지 보세요.</p>
+      ${lines}
+      <button class="btn primary" style="margin-top:8px" onclick="speak('${full.replace(/'/g,"\\'")}', 0.92)">▶ 대화 전체 듣기</button>
+    </div>`;
+}
+
+function renderQuiz(u){
+  const qs = u.quiz.map((q,qi)=>{
+    const opts = q.opts.map((o,oi)=>`
+      <button class="opt" data-q="${qi}" data-o="${oi}" onclick="answer(this,${qi},${oi},${q.a})">${o}</button>`).join("");
+    return `
+      <div class="q" data-qi="${qi}">
+        <div class="q-txt">${qi+1}. ${q.q.replace(/___/g,'<span class="blank">____</span>')}</div>
+        ${opts}
+        <div class="explain" data-ex="${qi}">💡 ${q.ex}</div>
+      </div>`;
+  }).join("");
+  return `
+    <div class="box">
+      <h3>✏️ 연습 퀴즈</h3>
+      ${qs}
+      <div id="quizResult"></div>
+    </div>`;
+}
+
+let quizState = {};
+function answer(btn, qi, chosen, correct){
+  const wrap = btn.closest(".q");
+  if(wrap.dataset.answered) return;
+  wrap.dataset.answered = "1";
+  wrap.querySelectorAll(".opt").forEach((b,i)=>{
+    b.disabled = true;
+    if(i===correct) b.classList.add("correct");
+    if(i===chosen && chosen!==correct) b.classList.add("wrong");
+  });
+  wrap.querySelector('.explain').classList.add("show");
+  quizState[qi] = (chosen===correct);
+  checkQuizDone();
+}
+function checkQuizDone(){
+  const u = window.__unit;
+  if(Object.keys(quizState).length < u.quiz.length) return;
+  const score = Object.values(quizState).filter(Boolean).length;
+  document.getElementById("quizResult").innerHTML = `
+    <div class="quiz-done">
+      <div class="score">${score} / ${u.quiz.length}</div>
+      <div style="color:var(--mut);margin-top:4px">${score===u.quiz.length?'완벽해요! 🎉':'좋아요, 오답 설명을 다시 읽어보세요 👍'}</div>
+    </div>
+    <button class="done-btn" onclick="markDone('${u.id}')">✓ 이 유닛 완료 표시하고 목록으로</button>`;
+}
+
+function markDone(id){
+  progress[id] = true; save();
+  renderHome();
+}
+
+/* ---------------- 말하기 연습 (음성인식) ---------------- */
+let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let sIndex = 0;
+function renderSpeak(u){
+  sIndex = 0;
+  const supported = !!SR;
+  setTimeout(()=>updateSpeakCard(u), 0);
+  return `
+    <div class="box speak-card" id="speakBox">
+      <div class="kv"><span id="spCount">1</span> / ${u.speak.length}</div>
+      <div class="speak-target" id="spTarget"></div>
+      <div class="speak-ko" id="spKo"></div>
+      <button class="say" style="width:44px;height:44px;font-size:19px;margin:0 auto 14px" onclick="speak(document.getElementById('spTarget').textContent)">🔊</button>
+      <div>
+        <button class="mic" id="micBtn" onclick="startRec()" ${supported?'':'disabled'}>🎤</button>
+      </div>
+      <div class="heard" id="heard">${supported?'🎤 버튼을 누르고 문장을 따라 말해보세요':'⚠️ 이 브라우저는 음성인식을 지원하지 않아요. Chrome을 사용하면 말하기 채점이 가능합니다. (듣기 🔊 는 사용 가능)'}</div>
+      <div class="speak-nav">
+        <button class="btn" id="prevBtn" onclick="moveSpeak(-1)">← 이전</button>
+        <button class="btn primary" id="nextBtn" onclick="moveSpeak(1)">다음 →</button>
+      </div>
+      <div class="hint">발음이 완벽하지 않아도 괜찮아요. 여러 번 반복이 최고의 연습! 💪</div>
+    </div>`;
+}
+function updateSpeakCard(u){
+  const arr = u.speak;
+  document.getElementById("spCount").textContent = sIndex+1;
+  document.getElementById("spTarget").textContent = arr[sIndex];
+  // 한국어 힌트: 예문/대화에서 매칭되면 보여주기
+  const match = u.examples.find(e=>e.en===arr[sIndex]);
+  document.getElementById("spKo").textContent = match ? match.ko : "";
+  document.getElementById("heard").innerHTML = SR ? '🎤 버튼을 누르고 문장을 따라 말해보세요' : document.getElementById("heard").innerHTML;
+  document.getElementById("prevBtn").disabled = (sIndex===0);
+  const nb = document.getElementById("nextBtn");
+  nb.textContent = (sIndex===arr.length-1) ? '완료 ✓' : '다음 →';
+}
+function moveSpeak(dir){
+  const u = window.__unit;
+  if(dir>0 && sIndex===u.speak.length-1){ markDone(u.id); return; }
+  sIndex = Math.max(0, Math.min(u.speak.length-1, sIndex+dir));
+  updateSpeakCard(u);
+}
+function normalize(s){ return s.toLowerCase().replace(/[^a-z0-9']+/g," ").trim(); }
+function similarity(a,b){
+  a=normalize(a).split(" "); b=normalize(b).split(" ");
+  const setB = {}; b.forEach(w=>setB[w]=(setB[w]||0)+1);
+  let hit=0; a.forEach(w=>{ if(setB[w]>0){hit++; setB[w]--;} });
+  return Math.round(hit/Math.max(a.length,1)*100);
+}
+function startRec(){
+  if(!SR) return;
+  const u = window.__unit;
+  const target = u.speak[sIndex];
+  const rec = new SR();
+  rec.lang="en-US"; rec.interimResults=false; rec.maxAlternatives=3;
+  const btn = document.getElementById("micBtn");
+  const heard = document.getElementById("heard");
+  btn.classList.add("rec"); heard.textContent="🎙️ 듣는 중...";
+  rec.onresult = (e)=>{
+    let best="", bestScore=-1;
+    for(let i=0;i<e.results[0].length;i++){
+      const t = e.results[0][i].transcript;
+      const sc = similarity(t, target);
+      if(sc>bestScore){bestScore=sc; best=t;}
+    }
+    const cls = bestScore>=70 ? 'match-good' : 'match-bad';
+    const emoji = bestScore>=90?'🌟 완벽해요!':bestScore>=70?'👍 좋아요!':'🔁 다시 해볼까요?';
+    heard.innerHTML = `내가 말한 것: <b>“${best}”</b><br><span class="${cls}">일치율 ${bestScore}% · ${emoji}</span>`;
+  };
+  rec.onerror = ()=>{ heard.textContent="⚠️ 인식 실패. 마이크 권한을 확인하고 다시 시도하세요."; btn.classList.remove("rec"); };
+  rec.onend = ()=>{ btn.classList.remove("rec"); };
+  try{ rec.start(); }catch(err){ btn.classList.remove("rec"); }
+}
+
+/* ---------------- 시작 ---------------- */
+renderHome();
+</script>
+</body>
+</html>

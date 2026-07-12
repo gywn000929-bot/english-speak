@@ -4,8 +4,10 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = "/home/user/english-speak";
-const UNITS_DIR = "/tmp/claude-0/-home-user-english-speak/c7a08471-8496-55b0-ad8b-fdacc033580c/scratchpad/units";
-const ART_OUT = "/tmp/claude-0/-home-user-english-speak/c7a08471-8496-55b0-ad8b-fdacc033580c/scratchpad/speakup-artifact.html";
+const BASE = "/tmp/claude-0/-home-user-english-speak/c7a08471-8496-55b0-ad8b-fdacc033580c/scratchpad";
+const UNITS_DIR = BASE + "/units";
+const QUIZ_DIR = BASE + "/quizzes";
+const ART_OUT = BASE + "/speakup-artifact.html";
 
 function unitNum(id){ return parseInt(String(id).replace(/[^0-9]/g,""),10); }
 
@@ -32,6 +34,31 @@ for(const u of all){
   seen.set(u.id, u);
 }
 const units = [...seen.values()].sort((a,b)=>unitNum(a.id)-unitNum(b.id));
+
+// 2b) merge expanded quizzes (q*.json: [{id, quiz:[...]}]) — replace each unit's quiz
+if(fs.existsSync(QUIZ_DIR)){
+  const qmap = new Map();
+  for(const f of fs.readdirSync(QUIZ_DIR).filter(f=>/^q\d+\.json$/.test(f)).sort()){
+    let arr;
+    try{ arr = JSON.parse(fs.readFileSync(path.join(QUIZ_DIR,f),"utf8")); }
+    catch(e){ console.error("QUIZ PARSE FAIL:", f, e.message); process.exit(1); }
+    for(const item of arr){
+      if(!item.id || !Array.isArray(item.quiz)){ console.error("bad quiz item in", f); process.exit(1); }
+      for(const q of item.quiz){
+        if(!Array.isArray(q.opts)||q.opts.length!==3){ console.error("bad opts", item.id, "in", f); process.exit(1); }
+        if(typeof q.a!=="number"||q.a<0||q.a>2){ console.error("bad answer idx", item.id, q.a, "in", f); process.exit(1); }
+        if(typeof q.q!=="string"||typeof q.ex!=="string"){ console.error("bad q/ex", item.id, "in", f); process.exit(1); }
+      }
+      qmap.set(item.id, item.quiz);
+    }
+  }
+  let applied=0, totalQ=0;
+  for(const u of units){ if(qmap.has(u.id)){ u.quiz = qmap.get(u.id); applied++; totalQ+=u.quiz.length; } }
+  console.log("quizzes merged: units updated =", applied, "| total quiz questions =", totalQ,
+    "| avg =", (totalQ/Math.max(applied,1)).toFixed(1));
+  const short = units.filter(u=>!u.quiz||u.quiz.length<10).map(u=>u.id);
+  if(short.length) console.log("WARN units with <10 quizzes:", short.join(","));
+}
 
 // 3) contiguity check
 const nums = units.map(u=>unitNum(u.id));

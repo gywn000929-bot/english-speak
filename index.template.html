@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Speak Up! · 회화 중심 영문법 인터랙티브 학습 (전체 145유닛)</title>
+<style>
+  :root{
+    --bg:#0f1220; --bg2:#171a2e; --card:#1b1f38; --card2:#232848;
+    --line:#2c3157; --txt:#eef1ff; --mut:#9aa2c8; --muted2:#6f77a3;
+    --acc:#6c8bff; --acc2:#8a6cff; --good:#3ecf8e; --bad:#ff6b81; --warn:#ffcf5c;
+    --shadow:0 10px 40px rgba(0,0,0,.35);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#eef1fb; --bg2:#e4e8f7; --card:#ffffff; --card2:#f3f5ff;
+      --line:#dfe3f5; --txt:#1a1e35; --mut:#5b628a; --muted2:#8991b8;
+      --acc:#4a68e8; --acc2:#7a5cff; --good:#1fa971; --bad:#e5485f; --warn:#c98a12;
+      --shadow:0 10px 40px rgba(60,70,120,.15);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:linear-gradient(160deg,var(--bg),var(--bg2));
+    color:var(--txt); min-height:100vh; -webkit-font-smoothing:antialiased; line-height:1.6;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:20px 16px 90px}
+  header.top{display:flex;align-items:center;gap:12px;padding:8px 0 16px;position:sticky;top:0;z-index:20;
+    background:linear-gradient(160deg,var(--bg),var(--bg2));}
+  .logo{width:44px;height:44px;border-radius:13px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:22px;box-shadow:var(--shadow)}
+  .brand h1{font-size:20px;margin:0;letter-spacing:-.3px}
+  .brand p{margin:0;color:var(--mut);font-size:12.5px}
+  .prog-wrap{margin-left:auto;text-align:right;min-width:120px}
+  .prog-bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:5px}
+  .prog-fill{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--acc));transition:width .5s}
+  .prog-wrap small{color:var(--mut);font-size:11.5px}
+
+  .hero{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .hero h2{margin:0 0 6px;font-size:16px}
+  .hero p{margin:0;color:var(--mut);font-size:13px}
+
+  .search{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:11px 15px;margin-bottom:16px;box-shadow:var(--shadow);position:sticky;top:70px;z-index:15}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-size:15px;font-family:inherit}
+  .search input::placeholder{color:var(--muted2)}
+  .search .ico{font-size:16px;color:var(--mut)}
+  .search .clear{background:var(--card2);border:1px solid var(--line);color:var(--mut);border-radius:8px;
+    padding:4px 9px;cursor:pointer;font-size:12px;display:none}
+
+  .section{margin-bottom:22px}
+  .sec-head{display:flex;align-items:baseline;gap:9px;margin:0 2px 10px}
+  .sec-head h3{margin:0;font-size:15px;letter-spacing:-.2px}
+  .sec-head .cnt{color:var(--muted2);font-size:12px;font-weight:600}
+  .sec-head .bar{flex:1;height:1px;background:var(--line);margin-left:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px}
+  .unit-card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:13px 14px 12px;
+    cursor:pointer;position:relative;overflow:hidden;transition:transform .12s ease,border-color .12s ease}
+  .unit-card:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .unit-card .num{font-size:11px;color:var(--muted2);font-weight:700;letter-spacing:.7px}
+  .unit-card h4{margin:5px 0 2px;font-size:15px;font-weight:700}
+  .unit-card .en{color:var(--mut);font-size:11.5px;margin:0;line-height:1.4}
+  .done-dot{position:absolute;top:12px;right:12px;width:18px;height:18px;border-radius:50%;
+    background:var(--good);display:none;place-items:center;color:#fff;font-size:11px}
+  .unit-card.done .done-dot{display:grid}
+  .unit-card.done{border-color:color-mix(in srgb,var(--good) 45%,var(--line))}
+  .no-res{color:var(--mut);text-align:center;padding:40px 0;font-size:14px}
+
+  .back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--acc);
+    font-size:14px;cursor:pointer;padding:6px 0;margin-bottom:4px;font-weight:600}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;
+    background:var(--card2);color:var(--acc);border:1px solid var(--line)}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px;position:sticky;top:66px;z-index:12;
+    padding:6px 0;background:linear-gradient(160deg,var(--bg),var(--bg2))}
+  .tab{background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:99px;
+    padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;transition:all .12s;font-family:inherit}
+  .tab.active{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-color:transparent}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .box h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .box .lead{color:var(--txt);font-size:14.5px}
+  .kv{color:var(--mut);font-size:13.5px}
+
+  .pat{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px dashed var(--line)}
+  .pat:first-of-type{border-top:none}
+  .pat .p-en{font-weight:700;font-size:15px}
+  .pat .p-ko{color:var(--mut);font-size:13px}
+
+  .ex-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
+  .ex-row:first-of-type{border-top:none}
+  .ex-row .ex-txt{flex:1}
+  .ex-row .ex-en{font-size:15px;font-weight:600}
+  .ex-row .ex-ko{color:var(--mut);font-size:13px}
+  .say{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);
+    background:var(--card2);color:var(--acc);cursor:pointer;font-size:17px;display:grid;place-items:center;transition:all .12s}
+  .say:hover{background:var(--acc);color:#fff}
+  .say:active{transform:scale(.92)}
+
+  .dlg{display:flex;gap:10px;margin:12px 0}
+  .dlg .who{flex:0 0 42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px}
+  .dlg.a .who{background:linear-gradient(135deg,var(--acc),#4a68e8)}
+  .dlg.b .who{background:linear-gradient(135deg,var(--acc2),#b06cff)}
+  .bubble{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 13px;flex:1}
+  .bubble .b-en{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .bubble .b-ko{color:var(--mut);font-size:12.5px;margin-top:2px}
+  .bubble .say{width:32px;height:32px;font-size:15px}
+
+  .q{margin-bottom:16px}
+  .q .q-txt{font-weight:600;font-size:15px;margin-bottom:10px}
+  .q .q-txt .blank{color:var(--acc);font-weight:800}
+  .opt{display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);
+    color:var(--txt);border-radius:11px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:14px;transition:all .12s;font-family:inherit}
+  .opt:hover{border-color:var(--acc)}
+  .opt.correct{background:rgba(62,207,142,.15);border-color:var(--good);color:var(--good);font-weight:700}
+  .opt.wrong{background:rgba(255,107,129,.13);border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .explain{font-size:13px;color:var(--mut);margin-top:6px;padding:9px 12px;background:var(--card2);
+    border-left:3px solid var(--acc);border-radius:8px;display:none}
+  .explain.show{display:block}
+  .quiz-done{text-align:center;padding:16px}
+  .quiz-done .score{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--good),var(--acc));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+  .speak-card{text-align:center;padding:22px 18px}
+  .speak-target{font-size:20px;font-weight:700;margin:6px 0 4px}
+  .speak-ko{color:var(--mut);font-size:13.5px;margin-bottom:16px}
+  .mic{width:78px;height:78px;border-radius:50%;border:none;cursor:pointer;font-size:32px;color:#fff;
+    background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:var(--shadow);transition:transform .12s}
+  .mic:active{transform:scale(.9)}
+  .mic.rec{animation:pulse 1s infinite;background:linear-gradient(135deg,var(--bad),#ff4d6d)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,107,129,.5)}70%{box-shadow:0 0 0 22px rgba(255,107,129,0)}100%{box-shadow:0 0 0 0 rgba(255,107,129,0)}}
+  .heard{margin-top:16px;min-height:26px;font-size:15px}
+  .heard b{color:var(--txt)}
+  .speak-nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+  .btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:11px;
+    padding:10px 16px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:all .12s}
+  .btn:hover{border-color:var(--acc)}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-color:transparent}
+  .btn:disabled{opacity:.4;cursor:default}
+  .match-good{color:var(--good);font-weight:700}
+  .match-bad{color:var(--bad)}
+  .hint{font-size:12px;color:var(--muted2);margin-top:12px}
+  .done-btn{display:block;width:100%;margin-top:6px;padding:13px;border-radius:13px;border:none;
+    background:linear-gradient(135deg,var(--good),var(--acc));color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .unit-foot{display:flex;justify-content:space-between;gap:10px;margin-top:4px}
+  .footer-note{text-align:center;color:var(--muted2);font-size:11.5px;margin-top:24px;line-height:1.7}
+  @media(max-width:520px){.wrap{padding:16px 12px 80px}.prog-wrap{min-width:92px}.search{top:66px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">🗣️</div>
+    <div class="brand">
+      <h1>Speak Up!</h1>
+      <p>회화 중심 영문법 · 전체 <span id="totalCount">0</span>유닛</p>
+    </div>
+    <div class="prog-wrap">
+      <small><span id="doneCount">0</span> / <span id="totalCount2">0</span> 완료</small>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+  </header>
+  <main id="app"></main>
+  <div class="footer-note">
+    Grammar in Use Intermediate 커리큘럼(145유닛 · 16개 파트) 구성을 참고한 오리지널 학습 콘텐츠 ·
+    발음 듣기 🔊 와 말하기 🎤 는 브라우저 음성 기능을 사용합니다 (Chrome 권장)
+  </div>
+</div>
+
+<script type="application/json" id="unitData">__UNIT_DATA_JSON__</script>
+<script>
+const UNITS = JSON.parse(document.getElementById("unitData").textContent);
+document.getElementById("totalCount").textContent = UNITS.length;
+document.getElementById("totalCount2").textContent = UNITS.length;
+
+const STORE_KEY = "speakup_progress_v2";
+let progress = {};
+try{ progress = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ progress = {}; }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(progress)); }catch(e){} }
+
+const app = document.getElementById("app");
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+function refreshProgress(){
+  const done = Object.keys(progress).filter(k=>progress[k]).length;
+  document.getElementById("doneCount").textContent = done;
+  document.getElementById("progFill").style.width = (done/UNITS.length*100)+"%";
+}
+
+/* 섹션 순서(첫 등장 순) */
+const SECTIONS = [];
+UNITS.forEach(u=>{ if(!SECTIONS.includes(u.tag)) SECTIONS.push(u.tag); });
+
+/* 음성: 듣기 */
+let voices = [];
+function loadVoices(){ voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text, rate=0.95){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang="en-US"; u.rate=rate;
+  const v = voices.find(v=>/en-US/i.test(v.lang)) || voices.find(v=>/^en/i.test(v.lang));
+  if(v) u.voice=v; speechSynthesis.speak(u);
+}
+
+let searchTerm = "";
+function renderHome(){
+  refreshProgress();
+  const idxOf = {}; UNITS.forEach((u,i)=>idxOf[u.id]=i);
+  const term = searchTerm.trim().toLowerCase();
+  const match = u => !term || (u.title+" "+u.en+" "+u.tag).toLowerCase().includes(term);
+
+  let sectionsHtml = SECTIONS.map(sec=>{
+    const items = UNITS.filter(u=>u.tag===sec && match(u));
+    if(!items.length) return "";
+    const doneN = items.filter(u=>progress[u.id]).length;
+    const cards = items.map(u=>`
+      <div class="unit-card ${progress[u.id]?'done':''}" onclick="openUnit('${u.id}')">
+        <div class="done-dot">✓</div>
+        <div class="num">UNIT ${idxOf[u.id]+1}</div>
+        <h4>${u.title}</h4>
+        <p class="en">${u.en}</p>
+      </div>`).join("");
+    return `<div class="section">
+      <div class="sec-head"><h3>${sec}</h3><span class="cnt">${doneN}/${items.length}</span><span class="bar"></span></div>
+      <div class="grid">${cards}</div>
+    </div>`;
+  }).join("");
+
+  if(!sectionsHtml.trim()) sectionsHtml = `<div class="no-res">‘${searchTerm}’ 검색 결과가 없어요.</div>`;
+
+  app.innerHTML = `
+    <div class="hero">
+      <h2>👋 회화가 되는 영문법, 전체 커리큘럼을 직접 말하며</h2>
+      <p>16개 파트 · 145개 유닛. 각 유닛마다 <b>설명 → 예문 듣기 → 실전 대화 → 퀴즈 → 말하기</b>.
+      🔊 로 원어민 발음을 듣고, 🎤 로 따라 말하면 발음이 채점됩니다. 진도는 자동 저장돼요.</p>
+    </div>
+    <div class="search">
+      <span class="ico">🔎</span>
+      <input id="searchInput" type="text" placeholder="유닛 검색 (예: 현재완료, phrasal, 관사...)" value="${searchTerm.replace(/"/g,'&quot;')}" />
+      <button class="clear" id="clearBtn" onclick="clearSearch()">지우기</button>
+    </div>
+    ${sectionsHtml}`;
+
+  const inp = document.getElementById("searchInput");
+  const clr = document.getElementById("clearBtn");
+  clr.style.display = searchTerm ? "block" : "none";
+  inp.oninput = (e)=>{
+    searchTerm = e.target.value;
+    const pos = e.target.selectionStart;
+    renderHome();
+    const ni = document.getElementById("searchInput");
+    ni.focus(); try{ ni.setSelectionRange(pos,pos); }catch(_){}
+  };
+  if(term){ inp.focus(); const L=inp.value.length; try{inp.setSelectionRange(L,L);}catch(_){} }
+}
+function clearSearch(){ searchTerm=""; renderHome(); }
+
+function openUnit(id){
+  const u = UNITS.find(x=>x.id===id);
+  const idx = UNITS.findIndex(x=>x.id===id);
+  window.__unit = u; quizState = {};
+  app.innerHTML = `
+    <button class="back" onclick="renderHome()">← 유닛 목록</button>
+    <div><span class="tag">UNIT ${idx+1} · ${u.tag}</span></div>
+    <h2 style="margin:8px 0 2px;font-size:22px">${u.title}</h2>
+    <p style="margin:0 0 4px;color:var(--mut);font-size:14px">${u.en}</p>
+    <div class="tabs">
+      <button class="tab active" data-t="learn" onclick="switchTab(this)">📖 설명</button>
+      <button class="tab" data-t="ex" onclick="switchTab(this)">🔊 예문</button>
+      <button class="tab" data-t="dlg" onclick="switchTab(this)">💬 대화</button>
+      <button class="tab" data-t="quiz" onclick="switchTab(this)">✏️ 퀴즈</button>
+      <button class="tab" data-t="speak" onclick="switchTab(this)">🎤 말하기</button>
+    </div>
+    <div class="panel active" data-p="learn">${renderLearn(u)}</div>
+    <div class="panel" data-p="ex">${renderExamples(u)}</div>
+    <div class="panel" data-p="dlg">${renderDialogue(u)}</div>
+    <div class="panel" data-p="quiz">${renderQuiz(u)}</div>
+    <div class="panel" data-p="speak">${renderSpeak(u)}</div>`;
+  window.scrollTo(0,0);
+}
+function switchTab(btn){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  btn.classList.add("active");
+  const t = btn.dataset.t;
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.dataset.p===t));
+}
+function renderLearn(u){
+  const pats = (u.patterns||[]).map(p=>`<div class="pat"><div><div class="p-en">${p.en}</div><div class="p-ko">${p.ko}</div></div></div>`).join("");
+  return `<div class="box"><h3>💡 핵심 개념</h3><p class="lead">${u.intro}</p></div>
+    <div class="box"><h3>🔑 핵심 패턴</h3>${pats}</div>`;
+}
+function renderExamples(u){
+  const rows = (u.examples||[]).map(e=>`
+    <div class="ex-row"><div class="ex-txt"><div class="ex-en">${e.en}</div><div class="ex-ko">${e.ko}</div></div>
+      <button class="say" onclick="speak('${esc(e.en)}')" title="발음 듣기">🔊</button></div>`).join("");
+  return `<div class="box"><h3>🔊 예문 듣기</h3><p class="kv" style="margin:-4px 0 6px">🔊 를 눌러 원어민 발음을 들어보세요.</p>${rows}</div>`;
+}
+function renderDialogue(u){
+  const lines = (u.dialogue||[]).map(d=>`
+    <div class="dlg ${d.w==='A'?'a':'b'}"><div class="who">${d.w}</div>
+      <div class="bubble"><div class="b-en"><span>${d.en}</span><button class="say" onclick="speak('${esc(d.en)}')">🔊</button></div>
+      <div class="b-ko">${d.ko}</div></div></div>`).join("");
+  const full = (u.dialogue||[]).map(d=>d.en).join(" ... ");
+  return `<div class="box"><h3>💬 실전 대화</h3><p class="kv" style="margin:-4px 0 10px">이 표현이 실제 대화에서 어떻게 쓰이는지 보세요.</p>${lines}
+    <button class="btn primary" style="margin-top:8px" onclick="speak('${esc(full)}',0.92)">▶ 대화 전체 듣기</button></div>`;
+}
+function renderQuiz(u){
+  const qs = (u.quiz||[]).map((q,qi)=>{
+    const opts = q.opts.map((o,oi)=>`<button class="opt" onclick="answer(this,${qi},${oi},${q.a})">${o}</button>`).join("");
+    return `<div class="q" data-qi="${qi}"><div class="q-txt">${qi+1}. ${String(q.q).replace(/___/g,'<span class="blank">____</span>')}</div>
+      ${opts}<div class="explain">💡 ${q.ex}</div></div>`;
+  }).join("");
+  return `<div class="box"><h3>✏️ 연습 퀴즈</h3>${qs}<div id="quizResult"></div></div>`;
+}
+let quizState = {};
+function answer(btn, qi, chosen, correct){
+  const wrap = btn.closest(".q");
+  if(wrap.dataset.answered) return; wrap.dataset.answered="1";
+  wrap.querySelectorAll(".opt").forEach((b,i)=>{ b.disabled=true;
+    if(i===correct) b.classList.add("correct");
+    if(i===chosen && chosen!==correct) b.classList.add("wrong"); });
+  wrap.querySelector('.explain').classList.add("show");
+  quizState[qi] = (chosen===correct); checkQuizDone();
+}
+function checkQuizDone(){
+  const u = window.__unit;
+  if(Object.keys(quizState).length < u.quiz.length) return;
+  const score = Object.values(quizState).filter(Boolean).length;
+  document.getElementById("quizResult").innerHTML = `
+    <div class="quiz-done"><div class="score">${score} / ${u.quiz.length}</div>
+      <div style="color:var(--mut);margin-top:4px">${score===u.quiz.length?'완벽해요! 🎉':'좋아요, 오답 해설을 다시 읽어보세요 👍'}</div></div>
+    <button class="done-btn" onclick="markDone('${u.id}')">✓ 이 유닛 완료 표시하고 목록으로</button>`;
+}
+function markDone(id){ progress[id]=true; save(); renderHome(); }
+
+let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let sIndex = 0;
+function renderSpeak(u){
+  sIndex = 0; const supported = !!SR;
+  setTimeout(()=>updateSpeakCard(u),0);
+  return `<div class="box speak-card">
+    <div class="kv"><span id="spCount">1</span> / ${(u.speak||[]).length}</div>
+    <div class="speak-target" id="spTarget"></div>
+    <div class="speak-ko" id="spKo"></div>
+    <button class="say" style="width:44px;height:44px;font-size:19px;margin:0 auto 14px" onclick="speak(document.getElementById('spTarget').textContent)">🔊</button>
+    <div><button class="mic" id="micBtn" onclick="startRec()" ${supported?'':'disabled'}>🎤</button></div>
+    <div class="heard" id="heard">${supported?'🎤 버튼을 누르고 문장을 따라 말해보세요':'⚠️ 이 브라우저는 음성인식을 지원하지 않아요. Chrome에서 말하기 채점이 가능합니다. (듣기 🔊 는 사용 가능)'}</div>
+    <div class="speak-nav">
+      <button class="btn" id="prevBtn" onclick="moveSpeak(-1)">← 이전</button>
+      <button class="btn primary" id="nextBtn" onclick="moveSpeak(1)">다음 →</button>
+    </div>
+    <div class="hint">발음이 완벽하지 않아도 괜찮아요. 반복이 최고의 연습! 💪</div></div>`;
+}
+function updateSpeakCard(u){
+  const arr = u.speak||[];
+  document.getElementById("spCount").textContent = sIndex+1;
+  document.getElementById("spTarget").textContent = arr[sIndex]||"";
+  const m = (u.examples||[]).find(e=>e.en===arr[sIndex]) || (u.dialogue||[]).find(d=>d.en===arr[sIndex]);
+  document.getElementById("spKo").textContent = m ? m.ko : "";
+  document.getElementById("prevBtn").disabled = (sIndex===0);
+  document.getElementById("nextBtn").textContent = (sIndex===arr.length-1)?'완료 ✓':'다음 →';
+}
+function moveSpeak(dir){
+  const u = window.__unit;
+  if(dir>0 && sIndex===(u.speak.length-1)){ markDone(u.id); return; }
+  sIndex = Math.max(0, Math.min(u.speak.length-1, sIndex+dir)); updateSpeakCard(u);
+}
+function normalize(s){ return s.toLowerCase().replace(/[^a-z0-9']+/g," ").trim(); }
+function similarity(a,b){
+  a=normalize(a).split(" "); b=normalize(b).split(" ");
+  const setB={}; b.forEach(w=>setB[w]=(setB[w]||0)+1);
+  let hit=0; a.forEach(w=>{ if(setB[w]>0){hit++; setB[w]--;} });
+  return Math.round(hit/Math.max(a.length,1)*100);
+}
+function startRec(){
+  if(!SR) return;
+  const u=window.__unit, target=u.speak[sIndex];
+  const rec=new SR(); rec.lang="en-US"; rec.interimResults=false; rec.maxAlternatives=3;
+  const btn=document.getElementById("micBtn"), heard=document.getElementById("heard");
+  btn.classList.add("rec"); heard.textContent="🎙️ 듣는 중...";
+  rec.onresult=(e)=>{
+    let best="",bestScore=-1;
+    for(let i=0;i<e.results[0].length;i++){ const t=e.results[0][i].transcript; const sc=similarity(t,target); if(sc>bestScore){bestScore=sc;best=t;} }
+    const cls=bestScore>=70?'match-good':'match-bad';
+    const emoji=bestScore>=90?'🌟 완벽해요!':bestScore>=70?'👍 좋아요!':'🔁 다시 해볼까요?';
+    heard.innerHTML=`내가 말한 것: <b>“${best}”</b><br><span class="${cls}">일치율 ${bestScore}% · ${emoji}</span>`;
+  };
+  rec.onerror=()=>{ heard.textContent="⚠️ 인식 실패. 마이크 권한을 확인하고 다시 시도하세요."; btn.classList.remove("rec"); };
+  rec.onend=()=>{ btn.classList.remove("rec"); };
+  try{ rec.start(); }catch(err){ btn.classList.remove("rec"); }
+}
+
+renderHome();
+</script>
+</body>
+</html>

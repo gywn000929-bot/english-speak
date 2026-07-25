@@ -1,0 +1,180 @@
+[
+  {
+    "id": "ch1",
+    "title": "의문문의 뼈대: 어순",
+    "en": "How questions are built",
+    "intro": "영어 의문문의 핵심은 <b>주어와 (조)동사의 자리 바꾸기</b>예요. be동사·조동사는 주어 앞으로 나가고, 일반동사는 <b>do/does/did</b>의 도움을 받습니다. 크게 <b>Yes/No 의문문</b>과 <b>의문사(Wh-) 의문문</b> 두 갈래예요.",
+    "patterns": [
+      { "en": "Be + 주어 ~?", "ko": "Are you ready? / Is she home?" },
+      { "en": "Do/Does/Did + 주어 + 동사원형 ~?", "ko": "Do you know? / Did he call?" },
+      { "en": "의문사 + (조)동사 + 주어 ~?", "ko": "Where do you live?" }
+    ],
+    "examples": [
+      { "en": "Are you free tonight?", "ko": "오늘 밤 시간 있어?" },
+      { "en": "Do you speak English?", "ko": "영어 할 줄 알아?" },
+      { "en": "Where does she work?", "ko": "그녀는 어디서 일해?" },
+      { "en": "Can you help me for a second?", "ko": "잠깐 도와줄 수 있어?" }
+    ],
+    "tip": "일반동사 의문문에서는 do/does/did 뒤 동사를 반드시 <b>원형</b>으로! (Does she <b>works</b>? ✗ → Does she <b>work</b>? ✓)"
+  },
+  {
+    "id": "ch2",
+    "title": "Yes/No 의문문과 짧은 대답",
+    "en": "Yes/No questions & short answers",
+    "intro": "예/아니오로 답하는 의문문이에요. 물어본 <b>(조)동사를 그대로 받아</b> 짧게 답합니다. 'Yes, I do. / No, she isn't.' 처럼요.",
+    "patterns": [
+      { "en": "Do you ~? → Yes, I do. / No, I don't.", "ko": "일반동사" },
+      { "en": "Are you ~? → Yes, I am. / No, I'm not.", "ko": "be동사" },
+      { "en": "Have you ~? → Yes, I have. / No, I haven't.", "ko": "완료·조동사" }
+    ],
+    "examples": [
+      { "en": "Do you like coffee? Yes, I do.", "ko": "커피 좋아해? 응, 좋아해." },
+      { "en": "Is it raining? No, it isn't.", "ko": "비 와? 아니, 안 와." },
+      { "en": "Have you eaten? Yes, I have.", "ko": "밥 먹었어? 응, 먹었어." },
+      { "en": "Can you swim? No, I can't.", "ko": "수영할 줄 알아? 아니, 못 해." }
+    ],
+    "tip": "짧은 대답에서 <b>물어본 조동사를 그대로</b> 받아요. 'Do you ~?'에 'Yes, I am.'은 ✗ → 'Yes, I do.' ✓"
+  },
+  {
+    "id": "ch3",
+    "title": "Wh- 의문사로 묻기",
+    "en": "who / what / which / whose / where / when / why",
+    "intro": "구체적인 정보를 물을 땐 <b>의문사</b>를 문장 맨 앞에 두고 그 뒤는 Yes/No 의문문 어순과 같아요. <b>what</b>은 범위가 열려 있고 <b>which</b>는 정해진 선택지 중에서 고를 때 써요.",
+    "patterns": [
+      { "en": "의문사 + do/does/did + 주어 + 동사원형?", "ko": "What do you want?" },
+      { "en": "which + (명사): 선택지 중에서", "ko": "Which color do you like?" },
+      { "en": "whose + 명사: 누구의 ~", "ko": "Whose bag is this?" }
+    ],
+    "examples": [
+      { "en": "What do you do on weekends?", "ko": "주말에 뭐 해?" },
+      { "en": "Which one do you prefer, tea or coffee?", "ko": "차랑 커피 중 뭐가 더 좋아?" },
+      { "en": "Whose turn is it?", "ko": "누구 차례야?" },
+      { "en": "Why are you so quiet today?", "ko": "오늘 왜 이렇게 조용해?" }
+    ],
+    "tip": "열린 질문은 <b>what</b>, 정해진 선택지는 <b>which</b>. 'Which do you want, this or that?'처럼 선택지가 있으면 which!"
+  },
+  {
+    "id": "ch4",
+    "title": "How 의문문",
+    "en": "how + adjective / adverb",
+    "intro": "<b>How</b>는 방법·상태를 묻고, 뒤에 형용사/부사를 붙이면 정도·수량을 물어요. <b>how much</b>(양·가격), <b>how many</b>(수), <b>how long</b>(길이·기간), <b>how often</b>(빈도), <b>how far</b>(거리) 등 회화에서 매일 씁니다.",
+    "patterns": [
+      { "en": "How + 형용사/부사 + 의문문?", "ko": "How old are you?" },
+      { "en": "How much/many + (명사) ~?", "ko": "How many books do you have?" },
+      { "en": "How long/often/far ~?", "ko": "How long does it take?" }
+    ],
+    "examples": [
+      { "en": "How much is this?", "ko": "이거 얼마예요?" },
+      { "en": "How many people are coming?", "ko": "몇 명이나 와?" },
+      { "en": "How often do you exercise?", "ko": "얼마나 자주 운동해?" },
+      { "en": "How long have you lived here?", "ko": "여기 얼마나 오래 살았어?" }
+    ],
+    "tip": "셀 수 있으면 <b>how many</b>, 셀 수 없으면 <b>how much</b>. (how many <b>waters</b> ✗ → how much water ✓)"
+  },
+  {
+    "id": "ch5",
+    "title": "주어 의문문 vs 목적어 의문문",
+    "en": "Who broke it? vs Who did you meet?",
+    "intro": "이게 한국인이 가장 많이 헷갈리는 부분! 의문사가 <b>주어</b>이면 do/does/did를 <b>쓰지 않고</b> 바로 동사가 와요. 의문사가 <b>목적어</b>이면 보통의 의문문 어순(do/did 사용)입니다.",
+    "patterns": [
+      { "en": "주어 의문문: Who + 동사 ~? (do 없음)", "ko": "Who called you? / What happened?" },
+      { "en": "목적어 의문문: Who + did + 주어 + 동사원형 ~?", "ko": "Who did you call?" }
+    ],
+    "examples": [
+      { "en": "Who broke the window?", "ko": "누가 창문 깼어? (누가 = 주어)" },
+      { "en": "Who did you invite?", "ko": "누구를 초대했어? (누구를 = 목적어)" },
+      { "en": "What happened last night?", "ko": "어젯밤에 무슨 일 있었어?" },
+      { "en": "What did she say to you?", "ko": "그녀가 너한테 뭐라고 했어?" }
+    ],
+    "tip": "의문사가 주어면 <b>did를 넣지 마세요</b>. 'Who <b>did</b> call you?' ✗ → 'Who called you?' ✓"
+  },
+  {
+    "id": "ch6",
+    "title": "부정의문문과 대답의 함정",
+    "en": "Negative questions & Yes/No traps",
+    "intro": "'Don't you ~? / Isn't it ~?'처럼 부정으로 물으면 놀람·확인·권유의 느낌이 나요. 가장 중요한 건 <b>대답</b>! 영어는 질문이 부정이든 아니든, <b>내용이 긍정이면 Yes, 부정이면 No</b>로 답합니다(한국어와 반대일 때가 많아요).",
+    "patterns": [
+      { "en": "Don't you ~? / Aren't you ~? / Isn't it ~?", "ko": "확인·놀람" },
+      { "en": "사실이 긍정 → Yes (+긍정)", "ko": "Yes, I do." },
+      { "en": "사실이 부정 → No (+부정)", "ko": "No, I don't." }
+    ],
+    "examples": [
+      { "en": "Don't you like it? Yes, I do! (사실 좋아함)", "ko": "이거 안 좋아해? — 아니, 좋아해!" },
+      { "en": "Aren't you tired? No, I'm not.", "ko": "안 피곤해? — 응, 안 피곤해." },
+      { "en": "Isn't this seat taken? No, it's free.", "ko": "이 자리 주인 없어요? — 네, 비어 있어요." },
+      { "en": "Didn't you get my message?", "ko": "내 메시지 못 받았어?" }
+    ],
+    "tip": "한국어 '응/아니'에 끌리지 말고 <b>사실</b>로 판단! 좋아하면 무조건 Yes, 안 하면 무조건 No."
+  },
+  {
+    "id": "ch7",
+    "title": "부가의문문 (question tags)",
+    "en": "..., isn't it? / ..., do you?",
+    "intro": "문장 끝에 붙여 '그렇지?' 하고 확인하는 꼬리표예요. 규칙은 간단! <b>긍정문에는 부정 태그, 부정문에는 긍정 태그</b>를 붙이고, 앞 문장의 (조)동사와 주어를 대명사로 받습니다.",
+    "patterns": [
+      { "en": "긍정문, + 부정 태그?", "ko": "It's cold, isn't it?" },
+      { "en": "부정문, + 긍정 태그?", "ko": "You don't smoke, do you?" },
+      { "en": "특수: I'm ~, aren't I? / Let's ~, shall we? / 명령문, will you?", "ko": "예외 암기" }
+    ],
+    "examples": [
+      { "en": "You're coming, aren't you?", "ko": "너 올 거지, 그렇지?" },
+      { "en": "She can drive, can't she?", "ko": "걔 운전할 수 있지, 안 그래?" },
+      { "en": "You didn't call him, did you?", "ko": "걔한테 전화 안 했지, 그렇지?" },
+      { "en": "Let's take a break, shall we?", "ko": "좀 쉬자, 어때?" }
+    ],
+    "tip": "앞이 긍정이면 태그는 부정, 앞이 부정이면 태그는 긍정. 조동사가 없으면 <b>do/does/did</b>로 받아요."
+  },
+  {
+    "id": "ch8",
+    "title": "간접의문문 (문장 속 의문문)",
+    "en": "Do you know where ...?",
+    "intro": "질문을 다른 문장 안에 넣으면 어순이 <b>평서문처럼</b> 바뀌고 do/does/did가 <b>사라져요</b>. 'Where is it?' → 'Do you know <b>where it is</b>?' Yes/No 질문은 <b>if/whether</b>로 연결합니다.",
+    "patterns": [
+      { "en": "Do you know + 의문사 + 주어 + 동사?", "ko": "Do you know where she lives?" },
+      { "en": "Could you tell me + 의문사 + 주어 + 동사?", "ko": "정중한 부탁" },
+      { "en": "I wonder / Do you know + if/whether + 주어 + 동사", "ko": "Yes/No형" }
+    ],
+    "examples": [
+      { "en": "Do you know what time it is?", "ko": "지금 몇 시인지 알아?" },
+      { "en": "Could you tell me where the station is?", "ko": "역이 어디 있는지 알려주시겠어요?" },
+      { "en": "I wonder if he is coming.", "ko": "그가 올지 궁금해." },
+      { "en": "I don't know why she left.", "ko": "그녀가 왜 떠났는지 모르겠어." }
+    ],
+    "tip": "간접의문문 안에서는 <b>도치·do 사용 금지</b>. 'Do you know where <b>is</b> the station?' ✗ → 'where the station is' ✓"
+  },
+  {
+    "id": "ch9",
+    "title": "전달된 의문문 (화법)",
+    "en": "She asked if / where ...",
+    "intro": "남이 한 질문을 전할 땐 <b>ask</b>를 쓰고, Yes/No 질문은 <b>if/whether</b>, 의문사 질문은 그 <b>의문사</b>로 잇습니다. 어순은 평서문이고, 전달동사가 과거면 <b>시제가 한 칸 뒤로</b>(is→was, do→did, will→would) 이동해요.",
+    "patterns": [
+      { "en": "asked + (사람) + if/whether + 주어 + 동사(과거로)", "ko": "Yes/No 질문" },
+      { "en": "asked + (사람) + 의문사 + 주어 + 동사(과거로)", "ko": "Wh- 질문" }
+    ],
+    "examples": [
+      { "en": "'Are you ready?' → He asked if I was ready.", "ko": "그는 내가 준비됐는지 물었다." },
+      { "en": "'Where do you live?' → She asked me where I lived.", "ko": "그녀는 내가 어디 사는지 물었다." },
+      { "en": "'What are you doing?' → He asked what I was doing.", "ko": "그는 내가 뭘 하는지 물었다." },
+      { "en": "'Will you come?' → They asked if I would come.", "ko": "그들은 내가 올 건지 물었다." }
+    ],
+    "tip": "전달동사가 과거면 시제를 뒤로! 그리고 어순은 반드시 <b>평서문</b>(의문문 도치 없음)."
+  },
+  {
+    "id": "ch10",
+    "title": "전치사 의문문 · 그 밖의 질문들",
+    "en": "What ... for? / What ... like? / what to do",
+    "intro": "회화형 의문문 마무리! 전치사는 보통 <b>문장 끝</b>으로 갑니다(What are you looking <b>for</b>?). 그 외 자주 쓰는 <b>What ... like?</b>(어때?), <b>What/How about ...?</b>(제안), <b>의문사 + to부정사</b>(what to do), <b>선택의문문</b>(A or B?)도 함께 익혀요.",
+    "patterns": [
+      { "en": "의문사 ... 전치사? (전치사는 끝으로)", "ko": "Who are you talking to?" },
+      { "en": "What is/are ~ like?", "ko": "어떤지 묘사 요청" },
+      { "en": "의문사 + to부정사", "ko": "I don't know what to do." }
+    ],
+    "examples": [
+      { "en": "What are you looking for?", "ko": "뭐 찾고 있어?" },
+      { "en": "What's your new job like?", "ko": "새 직장 어때?" },
+      { "en": "How about grabbing a coffee?", "ko": "커피 한잔 어때?" },
+      { "en": "I'm not sure where to go.", "ko": "어디로 가야 할지 모르겠어." }
+    ],
+    "tip": "전치사는 대개 <b>문장 끝</b>. 'For what are you looking?'보다 'What are you looking for?'가 훨씬 자연스러워요."
+  }
+]

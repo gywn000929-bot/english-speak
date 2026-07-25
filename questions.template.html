@@ -131,6 +131,10 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .q-actions{margin-top:14px;text-align:right}
   .w-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#fff;background:var(--accent);border-radius:99px;padding:3px 10px;margin-bottom:8px}
+  .s-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:var(--bg);background:var(--ink);border-radius:99px;padding:3px 10px;margin-bottom:8px}
+  input.s-in{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:12px;
+    padding:13px 15px;font-size:16px;font-family:inherit;margin-top:4px}
+  input.s-in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .w-prompt{font-family:var(--serif);font-size:20px;font-weight:700;line-height:1.4;margin:2px 0 4px;text-wrap:balance}
   .w-hint{font-size:12px;color:var(--faint);margin-bottom:12px}
   textarea.w-in{width:100%;min-height:74px;resize:vertical;background:var(--panel2);border:1px solid var(--line);
@@ -232,11 +236,11 @@ function home(){
     <div class="hero">
       <p class="eyebrow">Master English Questions</p>
       <h2>의문문, 정말 못 하는 질문이 없도록</h2>
-      <p>챕터마다 학습 + 문제. 절반은 <b style="color:var(--accent-ink)">선택형</b>, 절반은 <b style="color:var(--accent-ink)">한글→영어 작문</b>이에요. 작문은 맞다·틀리다가 아니라, 쓴 뒤에 <b style="color:var(--accent-ink)">원어민에게 어떻게 들리는지·어떻게 하면 자연스러운지</b> 코칭이 나와요.</p>
+      <p>문제는 세 가지 — <b style="color:var(--accent-ink)">객관식</b>(선택형), <b style="color:var(--accent-ink)">주관식</b>(정답 입력·자동 채점), <b style="color:var(--accent-ink)">작문</b>(한글→영어). 작문은 맞다·틀리다가 아니라, 쓴 뒤에 <b style="color:var(--accent-ink)">원어민에게 어떻게 들리는지·어떻게 하면 자연스러운지</b> 코칭이 나와요.</p>
       <div class="stats">
         <div class="stat"><div class="n">${CHAPTERS.length}</div><div class="l">학습 챕터</div></div>
         <div class="stat"><div class="n acc">${QBANK.length}</div><div class="l">연습 문제</div></div>
-        <div class="stat"><div class="n">${QBANK.filter(q=>(q.type||'mc')==='write').length}</div><div class="l">영작 문제</div></div>
+        <div class="stat"><div class="n">3</div><div class="l">문제 유형</div></div>
       </div>
     </div>
     <div class="sec-label"><h3>📚 챕터별 학습 &amp; 문제</h3><span class="rule"></span></div>
@@ -279,8 +283,9 @@ function reader(i){
 function markRead(id){ store.read[id]=true; save(); home(); }
 
 /* ---------- QUIZ RUNNER ---------- */
-let Q={list:[],i:0,mcScore:0,mcTotal:0,writeCount:0,wrong:[],title:""};
+let Q={list:[],i:0,gScore:0,gTotal:0,writeCount:0,wrong:[],title:""};
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function norm(s){ return String(s||"").toLowerCase().replace(/[‘’ʼ]/g,"'").replace(/[.?!,;:]+$/,"").replace(/\s+/g," ").trim(); }
 function startChapter(ci){ runQuiz(shuffle(QBANK.filter(q=>q.ci===ci)), CHAPTERS[ci].title); }
 function startTest(n){ runQuiz(shuffle(QBANK).slice(0,n), "종합 테스트"); }
 function startWrong(){
@@ -290,20 +295,21 @@ function startWrong(){
   runQuiz(shuffle(list), "오답 다시풀기");
 }
 function runQuiz(list,title){
-  Q={list,i:0,mcScore:0,mcTotal:list.filter(q=>(q.type||'mc')==='mc').length,writeCount:0,wrong:[],title};
+  Q={list,i:0,gScore:0,gTotal:list.filter(q=>{const t=q.type||'mc';return t==='mc'||t==='short';}).length,writeCount:0,wrong:[],title};
   renderQ();
 }
 function qHeader(){
   const n=Q.list.length;
   return `<button class="back" onclick="home()">← 홈 (그만두기)</button>
     <div class="q-top"><div class="qbar"><div class="qfill" id="qfill" style="width:${(Q.i)/n*100}%"></div></div>
-      <span class="qmeta">${Q.i+1} / ${n} · ✓${Q.mcScore}</span></div>
+      <span class="qmeta">${Q.i+1} / ${n} · ✓${Q.gScore}</span></div>
     <div class="q-cat">${Q.title}${Q.list[Q.i].ctitle && Q.list[Q.i].ctitle!==Q.title ? ' · '+Q.list[Q.i].ctitle : ''}</div>`;
 }
 function renderQ(){
   if(Q.i>=Q.list.length){ return renderResult(); }
   const q=Q.list[Q.i];
   if((q.type||'mc')==='write') return renderWrite(q);
+  if(q.type==='short') return renderShort(q);
   const n=Q.list.length;
   const opts=q.opts.map((o,oi)=>`<button class="opt" id="opt${oi}" onclick="pick(${oi})">${o}</button>`).join("");
   app.innerHTML=qHeader()+`
@@ -322,9 +328,43 @@ function pick(oi){
     if(i===oi&&oi!==correct)b.classList.add("wrong"); });
   document.getElementById("exp").classList.add("show");
   document.getElementById("nextBtn").style.display="inline-block";
-  if(oi===correct){ Q.mcScore++; store.wrong = store.wrong.filter(x=>x!==q.id); }
+  if(oi===correct){ Q.gScore++; store.wrong = store.wrong.filter(x=>x!==q.id); }
   else { Q.wrong.push({q, chosen:oi}); if(!store.wrong.includes(q.id)) store.wrong.push(q.id); }
   save();
+  const qf=document.getElementById("qfill"); if(qf) qf.style.width=((Q.i+1)/Q.list.length*100)+"%";
+}
+function renderShort(q){
+  const n=Q.list.length;
+  app.innerHTML=qHeader()+`
+    <div class="s-badge">✏️ 주관식 · 정답 입력</div>
+    <div class="q-text">${String(q.q).replace(/___/g,'<span class="blank">____</span>')}</div>
+    <input class="s-in" id="shortIn" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="정답을 입력하세요..." onkeydown="if(event.key==='Enter')gradeShort()" />
+    <div class="q-actions" id="sConfirm"><button class="btn primary" onclick="gradeShort()">정답 확인 →</button></div>
+    <div class="reveal" id="reveal"></div>`;
+  window.scrollTo(0,0);
+  const el=document.getElementById("shortIn"); if(el) el.focus();
+}
+function gradeShort(){
+  const q=Q.list[Q.i], n=Q.list.length;
+  const el=document.getElementById("shortIn"); if(!el || el.disabled) return;
+  const mine=el.value.trim(); el.disabled=true;
+  const accepted=(q.answers||[]);
+  const ok = accepted.some(a=>norm(a)===norm(mine)) && mine!=="";
+  if(ok){ Q.gScore++; store.wrong=store.wrong.filter(x=>x!==q.id); }
+  else { Q.wrong.push({q, chosen:mine, short:true}); if(!store.wrong.includes(q.id)) store.wrong.push(q.id); }
+  save();
+  const primary=accepted[0];
+  const others=accepted.slice(1).filter(a=>norm(a)!==norm(primary));
+  document.getElementById("reveal").innerHTML=`
+    <div class="r-card" style="border-color:${ok?'var(--good)':'var(--bad)'}">
+      <div class="rl" style="color:${ok?'var(--good)':'var(--bad)'}">${ok?'✅ 정답이에요!':'✏️ 아쉬워요'}</div>
+      <div class="r-mine" style="font-style:normal">${mine?escapeHtml(mine):'(입력하지 않음)'}</div></div>
+    <div class="r-card"><div class="rl">정답</div>
+      <div class="r-model"><span class="rm-t">${primary}</span><button class="say" onclick="speak('${esc(primary)}')">🔊</button></div>
+      ${others.length?`<div class="r-self" style="margin-top:6px">이것도 정답: ${others.join(' / ')}</div>`:''}</div>
+    <div class="r-nuance"><span class="rn-h">💡 해설</span>${q.ex}</div>
+    <div class="q-actions"><button class="btn primary" onclick="nextQ()">${Q.i===n-1?'결과 보기 →':'다음 →'}</button></div>`;
+  const sc=document.getElementById("sConfirm"); if(sc) sc.style.display='none';
   const qf=document.getElementById("qfill"); if(qf) qf.style.width=((Q.i+1)/Q.list.length*100)+"%";
 }
 function renderWrite(q){
@@ -375,15 +415,17 @@ function writeDone(ok){
 }
 function nextQ(){ Q.i++; renderQ(); }
 function renderResult(){
-  const mcT=Q.mcTotal, mcS=Q.mcScore, pct=mcT?Math.round(mcS/mcT*100):100;
-  const msg = mcT===0 ? '작문 연습 완료! 🎉'
+  const gT=Q.gTotal, gS=Q.gScore, pct=gT?Math.round(gS/gT*100):100;
+  const msg = gT===0 ? '작문 연습 완료! 🎉'
     : (pct===100?'완벽해요! 🎉':pct>=80?'훌륭해요! 👏':pct>=60?'좋아요 👍 오답을 다시 봐요.':'복습하고 다시 도전해요 💪');
-  const scoreLine = mcT
-    ? `<div class="big">${mcS} / ${mcT}</div><div class="msg">선택형 정답 · 작문 연습 ${Q.writeCount}개 완료</div>`
+  const scoreLine = gT
+    ? `<div class="big">${gS} / ${gT}</div><div class="msg">채점 문제 정답${Q.writeCount?` · 작문 연습 ${Q.writeCount}개`:''}</div>`
     : `<div class="big">✍️ ${Q.writeCount}</div><div class="msg">작문 연습 완료</div>`;
   const rev = Q.wrong.length ? `<div class="rev"><div class="rh">다시 볼 문제 (${Q.wrong.length})</div>`+
     Q.wrong.map(w=> w.write
       ? `<div class="rev-item"><div class="rq">✍️ ${w.q.ko}</div><div class="ra">자연스러운 표현: <span class="ok">${w.q.model}</span></div><div class="rx">💬 ${w.q.nuance}</div></div>`
+      : w.short
+      ? `<div class="rev-item"><div class="rq">✏️ ${String(w.q.q).replace(/___/g,'____')}</div><div class="ra">정답: <span class="ok">${w.q.answers[0]}</span>${w.chosen?` · 내 답: ${escapeHtml(w.chosen)}`:''}</div><div class="rx">💡 ${w.q.ex}</div></div>`
       : `<div class="rev-item"><div class="rq">${String(w.q.q).replace(/___/g,'____')}</div><div class="ra">정답: <span class="ok">${w.q.opts[w.q.a]}</span> · 내 답: ${w.q.opts[w.chosen]}</div><div class="rx">💡 ${w.q.ex}</div></div>`
     ).join("")+`</div>` : `<p class="ch-sub" style="text-align:center">다시 볼 문제가 없어요 🙌</p>`;
   app.innerHTML=`<button class="back" onclick="home()">← 홈</button>

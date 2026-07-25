@@ -6,6 +6,7 @@ const path = require("path");
 const ROOT = "/home/user/english-speak";
 const BASE = "/tmp/claude-0/-home-user-english-speak/c7a08471-8496-55b0-ad8b-fdacc033580c/scratchpad";
 const CHQUIZ_DIR = BASE + "/chquiz2";
+const CHSHORT_DIR = BASE + "/chshort";
 const ART_OUT = BASE + "/questions-artifact.html";
 
 const chapters = JSON.parse(fs.readFileSync(path.join(ROOT,"questions.chapters.json"),"utf8"));
@@ -38,6 +39,21 @@ chapters.forEach((c,idx)=>{
     return { type:"mc", q:q.q, opts:q.opts, a:q.a, ex:q.ex };
   });
   total += arr.length;
+
+  // append short-answer (주관식) items if present
+  const sf = path.join(CHSHORT_DIR, c.id + ".json");
+  if(fs.existsSync(sf)){
+    let sarr;
+    try{ sarr = JSON.parse(fs.readFileSync(sf,"utf8")); }
+    catch(e){ console.error("SHORT PARSE FAIL", c.id, e.message); process.exit(1); }
+    sarr.forEach((q,i)=>{
+      if(typeof q.q!=="string"||!q.q.trim()){ console.error("bad short.q", c.id, i); process.exit(1); }
+      if(!Array.isArray(q.answers)||!q.answers.length||!q.answers.every(a=>typeof a==="string"&&a.trim())){ console.error("bad short.answers", c.id, i); process.exit(1); }
+      if(typeof q.ex!=="string"){ console.error("bad short.ex", c.id, i); process.exit(1); }
+    });
+    c.quiz = c.quiz.concat(sarr.map(q=>({ type:"short", q:q.q, answers:q.answers, ex:q.ex })));
+    total += sarr.length;
+  }
 });
 const mc = chapters.reduce((s,c)=>s+c.quiz.filter(q=>q.type==="mc").length,0);
 const wr = chapters.reduce((s,c)=>s+c.quiz.filter(q=>q.type==="write").length,0);

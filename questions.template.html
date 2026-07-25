@@ -66,6 +66,7 @@
   .ch-meta{flex:1;min-width:0}
   .ch-meta .t{font-size:15px;font-weight:700}
   .ch-meta .e{font-size:11.5px;color:var(--mut)}
+  .ch-q{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border-radius:99px;padding:3px 9px}
   .ch-chk{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;font-size:11px;color:transparent}
   .ch-item.done .ch-chk{background:var(--good);border-color:var(--good);color:#fff}
 
@@ -102,6 +103,8 @@
   .say:hover{background:var(--accent);color:#fff;border-color:transparent}
   .tip{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13.5px;color:var(--ink)}
   .tip .th{font-weight:800;color:var(--accent-ink);margin-right:5px}
+  .cta{display:block;width:100%;padding:15px;border-radius:13px;border:none;background:var(--accent);color:#fff;
+    font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px}
   .ch-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
   .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:11px 17px;
     cursor:pointer;font-size:14px;font-weight:600;transition:all .12s}
@@ -109,7 +112,6 @@
   .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
   .btn:disabled{opacity:.4;cursor:default}
 
-  /* Quiz runner */
   .q-top{display:flex;align-items:center;gap:12px;margin-bottom:4px}
   .q-top .qbar{flex:1;height:7px;background:var(--line);border-radius:99px;overflow:hidden}
   .q-top .qfill{height:100%;width:0;background:var(--accent);transition:width .35s}
@@ -165,19 +167,16 @@
 </div>
 
 <script type="application/json" id="chapterData">__CHAPTERS_JSON__</script>
-<script type="application/json" id="qbankData">__QBANK_JSON__</script>
 <script>
 const CHAPTERS = JSON.parse(document.getElementById("chapterData").textContent);
-const QBANK = JSON.parse(document.getElementById("qbankData").textContent);
-const CAT_LABELS = {
-  c1:"Yes/No 의문문", c2:"Wh- 의문사", c3:"How 의문문", c4:"주어·목적어 의문문",
-  c5:"부정·부가의문문", c6:"간접의문문", c7:"전달 의문문(화법)", c8:"전치사·What about", c9:"의문사+to·선택·되묻기"
-};
-const CAT_ORDER = ["c1","c2","c3","c4","c5","c6","c7","c8","c9"];
-
+/* 전역 문제 은행: 각 챕터의 문제에 안정적 id/챕터정보 부여 */
+const QBANK = [];
+CHAPTERS.forEach((c,ci)=>{ (c.quiz||[]).forEach((q,qi)=>{
+  QBANK.push({ id:"ch"+(ci+1)+"-"+qi, ci, ctitle:c.title, q:q.q, opts:q.opts, a:q.a, ex:q.ex });
+}); });
 document.getElementById("chTotal").textContent = CHAPTERS.length;
 
-const KEY="qmaster_v1";
+const KEY="qmaster_v2";
 let store={read:{},wrong:[]};
 try{ store = Object.assign(store, JSON.parse(localStorage.getItem(KEY))||{}); }catch(e){}
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
@@ -196,6 +195,7 @@ function refreshProg(){
   document.getElementById("progFill").style.width=(d/CHAPTERS.length*100)+"%";
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function chCount(ci){ return CHAPTERS[ci].quiz ? CHAPTERS[ci].quiz.length : 0; }
 
 /* ---------- HOME ---------- */
 function home(){
@@ -204,6 +204,7 @@ function home(){
     <div class="ch-item ${store.read[c.id]?'done':''}" onclick="reader(${i})">
       <div class="ch-num">${i+1}</div>
       <div class="ch-meta"><div class="t">${c.title}</div><div class="e">${c.en}</div></div>
+      <div class="ch-q">${chCount(i)}문제</div>
       <div class="ch-chk">✓</div>
     </div>`).join("");
   const wrongN = store.wrong.length;
@@ -211,21 +212,21 @@ function home(){
     <div class="hero">
       <p class="eyebrow">Master English Questions</p>
       <h2>의문문, 정말 못 하는 질문이 없도록</h2>
-      <p>10개 챕터로 모든 유형을 익히고, ${QBANK.length}개 문제로 완벽하게 연습해요. 틀린 문제는 자동으로 오답노트에 모입니다.</p>
+      <p>10개 챕터마다 학습 + 문제가 붙어 있어요. 총 ${QBANK.length}개 문제로 반복 훈련하고, 틀린 문제는 자동으로 오답노트에 모입니다.</p>
       <div class="stats">
         <div class="stat"><div class="n">${CHAPTERS.length}</div><div class="l">학습 챕터</div></div>
         <div class="stat"><div class="n acc">${QBANK.length}</div><div class="l">연습 문제</div></div>
-        <div class="stat"><div class="n">${CAT_ORDER.length}</div><div class="l">유형</div></div>
+        <div class="stat"><div class="n">${Math.round(QBANK.length/CHAPTERS.length)}</div><div class="l">챕터당 문제</div></div>
       </div>
     </div>
-    <div class="sec-label"><h3>📖 학습 챕터</h3><span class="rule"></span></div>
+    <div class="sec-label"><h3>📚 챕터별 학습 &amp; 문제</h3><span class="rule"></span></div>
     <div class="ch-list">${chItems}</div>
-    <div class="sec-label"><h3>✏️ 퀴즈</h3><span class="rule"></span></div>
+    <div class="sec-label"><h3>✏️ 전체 퀴즈</h3><span class="rule"></span></div>
     <div class="modes">
-      <button class="mode wide primary-hint" onclick="startTest()" style="border-color:var(--accent)">
-        <div class="mi">🎯</div><div class="mt">종합 테스트 (랜덤 20문제)</div>
-        <div class="md">모든 유형에서 무작위 20문제 · 끝나면 점수와 오답 리뷰</div></button>
-      <button class="mode" onclick="drillMenu()"><div class="mi">🗂️</div><div class="mt">유형별 연습</div><div class="md">9개 유형 골라서 집중 훈련</div></button>
+      <button class="mode wide" onclick="startTest(30)" style="border-color:var(--accent)">
+        <div class="mi">🎯</div><div class="mt">종합 테스트 (랜덤 30문제)</div>
+        <div class="md">모든 챕터에서 무작위 30문제 · 끝나면 점수와 오답 리뷰</div></button>
+      <button class="mode" onclick="startTest(50)"><div class="mi">🔥</div><div class="mt">실력 점검 50문제</div><div class="md">더 길게, 전 범위 랜덤</div></button>
       <button class="mode" onclick="startWrong()" ${wrongN?'':'disabled'}><div class="mi">🔁</div><div class="mt">오답 다시풀기</div><div class="md">${wrongN?wrongN+'문제 대기 중':'아직 없음'}</div></button>
     </div>`;
   window.scrollTo(0,0);
@@ -247,6 +248,7 @@ function reader(i){
     <div class="box"><h4>핵심 패턴</h4>${pats}</div>
     <div class="box"><h4>예문 듣기</h4>${exs}</div>
     <div class="box"><div class="tip"><span class="th">이것만은!</span>${c.tip}</div></div>
+    <button class="cta" onclick="startChapter(${i})">📝 이 챕터 문제 풀기 (${chCount(i)}문제)</button>
     <button class="btn primary" style="width:100%;margin-bottom:12px" onclick="markRead('${c.id}')">✓ 이 챕터 학습 완료</button>
     <div class="ch-nav">
       <button class="btn" ${i===0?'disabled':''} onclick="reader(${i-1})">← 이전 챕터</button>
@@ -256,42 +258,25 @@ function reader(i){
 }
 function markRead(id){ store.read[id]=true; save(); home(); }
 
-/* ---------- DRILL MENU ---------- */
-function drillMenu(){
-  const rows = CAT_ORDER.map(k=>{
-    const n = QBANK.filter(q=>q.cat===k).length;
-    return `<div class="ch-item" onclick="startCat('${k}')">
-      <div class="ch-num">▷</div>
-      <div class="ch-meta"><div class="t">${CAT_LABELS[k]}</div><div class="e">${n}문제</div></div>
-      <div class="ch-chk" style="border:none;color:var(--faint)">›</div></div>`;
-  }).join("");
-  app.innerHTML = `<button class="back" onclick="home()">← 홈</button>
-    <h2 class="ch-title" style="font-size:22px">🗂️ 유형별 연습</h2>
-    <p class="ch-sub">한 유형을 골라 집중적으로 훈련하세요.</p>
-    <div class="ch-list" style="margin-top:12px">${rows}</div>`;
-  window.scrollTo(0,0);
-}
-
 /* ---------- QUIZ RUNNER ---------- */
-let Q={list:[],i:0,score:0,wrong:[],title:"",answered:false};
-function startCat(k){ runQuiz(shuffle(QBANK.filter(q=>q.cat===k)), CAT_LABELS[k]); }
-function startTest(){ runQuiz(shuffle(QBANK).slice(0,20), "종합 테스트"); }
+let Q={list:[],i:0,score:0,wrong:[],title:""};
+function startChapter(ci){ runQuiz(shuffle(QBANK.filter(q=>q.ci===ci)), CHAPTERS[ci].title); }
+function startTest(n){ runQuiz(shuffle(QBANK).slice(0,n), "종합 테스트"); }
 function startWrong(){
   const set=new Set(store.wrong);
   const list=QBANK.filter(q=>set.has(q.id));
   if(!list.length){ home(); return; }
   runQuiz(shuffle(list), "오답 다시풀기");
 }
-function runQuiz(list,title){ Q={list,i:0,score:0,wrong:[],title,answered:false}; renderQ(); }
+function runQuiz(list,title){ Q={list,i:0,score:0,wrong:[],title}; renderQ(); }
 function renderQ(){
   if(Q.i>=Q.list.length){ return renderResult(); }
   const q=Q.list[Q.i], n=Q.list.length;
-  Q.answered=false;
   const opts=q.opts.map((o,oi)=>`<button class="opt" id="opt${oi}" onclick="pick(${oi})">${o}</button>`).join("");
   app.innerHTML=`<button class="back" onclick="home()">← 홈 (그만두기)</button>
     <div class="q-top"><div class="qbar"><div class="qfill" id="qfill" style="width:${(Q.i)/n*100}%"></div></div>
       <span class="qmeta">${Q.i+1} / ${n} · ✓${Q.score}</span></div>
-    <div class="q-cat">${Q.title} · ${CAT_LABELS[q.cat]||''}</div>
+    <div class="q-cat">${Q.title}${q.ctitle && q.ctitle!==Q.title ? ' · '+q.ctitle : ''}</div>
     <div class="q-text">${String(q.q).replace(/___/g,'<span class="blank">____</span>')}</div>
     <div id="opts">${opts}</div>
     <div class="explain" id="exp">💡 ${q.ex}</div>
@@ -299,22 +284,22 @@ function renderQ(){
   window.scrollTo(0,0);
 }
 function pick(oi){
-  if(Q.answered) return; Q.answered=true;
-  const q=Q.list[Q.i], correct=q.a;
+  const q=Q.list[Q.i];
+  if(document.getElementById("opt0").disabled) return;
+  const correct=q.a;
   document.querySelectorAll(".opt").forEach((b,i)=>{ b.disabled=true;
     if(i===correct)b.classList.add("correct");
     if(i===oi&&oi!==correct)b.classList.add("wrong"); });
   document.getElementById("exp").classList.add("show");
   document.getElementById("nextBtn").style.display="inline-block";
-  const ok = oi===correct;
-  if(ok){ Q.score++; store.wrong = store.wrong.filter(x=>x!==q.id); }
+  if(oi===correct){ Q.score++; store.wrong = store.wrong.filter(x=>x!==q.id); }
   else { Q.wrong.push({q, chosen:oi}); if(!store.wrong.includes(q.id)) store.wrong.push(q.id); }
   save();
   const qf=document.getElementById("qfill"); if(qf) qf.style.width=((Q.i+1)/Q.list.length*100)+"%";
 }
 function nextQ(){ Q.i++; renderQ(); }
 function renderResult(){
-  const n=Q.list.length, pct=Math.round(Q.score/n*100);
+  const n=Q.list.length, pct=n?Math.round(Q.score/n*100):0;
   const msg = pct===100?'완벽해요! 🎉 못 푸는 질문이 없네요.':pct>=80?'훌륭해요! 👏 거의 다 왔어요.':pct>=60?'좋아요 👍 오답을 다시 보면 확실해져요.':'괜찮아요 💪 오답노트로 복습해요.';
   const rev = Q.wrong.length ? `<div class="rev"><div class="rh">틀린 문제 다시 보기 (${Q.wrong.length})</div>`+
     Q.wrong.map(w=>`<div class="rev-item">

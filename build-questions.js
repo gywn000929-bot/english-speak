@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const ROOT = "/home/user/english-speak";
 const BASE = "/tmp/claude-0/-home-user-english-speak/c7a08471-8496-55b0-ad8b-fdacc033580c/scratchpad";
-const CHQUIZ_DIR = BASE + "/chquiz";
+const CHQUIZ_DIR = BASE + "/chquiz2";
 const ART_OUT = BASE + "/questions-artifact.html";
 
 const chapters = JSON.parse(fs.readFileSync(path.join(ROOT,"questions.chapters.json"),"utf8"));
@@ -20,16 +20,29 @@ chapters.forEach((c,idx)=>{
   catch(e){ console.error("PARSE FAIL", c.id, e.message); process.exit(1); }
   if(!Array.isArray(arr) || arr.length < 1){ console.error("empty", c.id); process.exit(1); }
   arr.forEach((q,i)=>{
-    if(!Array.isArray(q.opts)||q.opts.length<2||q.opts.length>4){ console.error("bad opts", c.id, i); process.exit(1); }
-    if(typeof q.a!=="number"||q.a<0||q.a>=q.opts.length){ console.error("bad answer idx", c.id, i, q.a); process.exit(1); }
-    if(typeof q.q!=="string"||typeof q.ex!=="string"){ console.error("bad q/ex", c.id, i); process.exit(1); }
-    if(new Set(q.opts.map(o=>String(o).trim())).size!==q.opts.length){ console.error("dup opts", c.id, i); process.exit(1); }
+    const t = q.type || "mc";
+    if(t==="mc"){
+      if(!Array.isArray(q.opts)||q.opts.length<2||q.opts.length>4){ console.error("bad opts", c.id, i); process.exit(1); }
+      if(typeof q.a!=="number"||q.a<0||q.a>=q.opts.length){ console.error("bad answer idx", c.id, i, q.a); process.exit(1); }
+      if(typeof q.q!=="string"||typeof q.ex!=="string"){ console.error("bad q/ex", c.id, i); process.exit(1); }
+      if(new Set(q.opts.map(o=>String(o).trim())).size!==q.opts.length){ console.error("dup opts", c.id, i); process.exit(1); }
+    } else if(t==="write"){
+      if(typeof q.ko!=="string"||!q.ko.trim()){ console.error("bad write.ko", c.id, i); process.exit(1); }
+      if(typeof q.model!=="string"||!q.model.trim()){ console.error("bad write.model", c.id, i); process.exit(1); }
+      if(typeof q.nuance!=="string"||!q.nuance.trim()){ console.error("bad write.nuance", c.id, i); process.exit(1); }
+    } else { console.error("unknown type", c.id, i, t); process.exit(1); }
   });
-  c.quiz = arr.map(q=>({ q:q.q, opts:q.opts, a:q.a, ex:q.ex }));
+  c.quiz = arr.map(q=>{
+    const t = q.type || "mc";
+    if(t==="write") return { type:"write", ko:q.ko, model:q.model, alts:Array.isArray(q.alts)?q.alts:[], nuance:q.nuance, key:Array.isArray(q.key)?q.key:[] };
+    return { type:"mc", q:q.q, opts:q.opts, a:q.a, ex:q.ex };
+  });
   total += arr.length;
 });
+const mc = chapters.reduce((s,c)=>s+c.quiz.filter(q=>q.type==="mc").length,0);
+const wr = chapters.reduce((s,c)=>s+c.quiz.filter(q=>q.type==="write").length,0);
 console.log("per-chapter problems:", chapters.map(c=>c.id+":"+c.quiz.length).join(" "));
-console.log("total problems:", total, "| avg/chapter:", (total/chapters.length).toFixed(1));
+console.log("total problems:", total, "| mc:", mc, "| write:", wr, "| avg/chapter:", (total/chapters.length).toFixed(1));
 
 const tpl = fs.readFileSync(path.join(ROOT,"questions.template.html"),"utf8");
 const chJson = JSON.stringify(chapters).replace(/</g,"\\u003c");

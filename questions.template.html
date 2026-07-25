@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>의문문 마스터 · 인터랙티브 전자책</title>
+<style>
+  :root{
+    --sans:'Segoe UI',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    --serif:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,'Nanum Myeongjo',serif;
+    --bg:#141219; --panel:#1c1a24; --panel2:#232029; --raise:#2a2632;
+    --ink:#f2eff7; --mut:#a29daf; --faint:#726d7e; --line:#302c39; --line2:#3b3646;
+    --accent:#ff6551; --accent-soft:rgba(255,101,81,.14); --accent-ink:#ff8574;
+    --good:#43c88a; --good-soft:rgba(67,200,138,.15); --bad:#ff6b81; --bad-soft:rgba(255,107,129,.13);
+    --shadow-sm:0 6px 22px -12px rgba(0,0,0,.6); --r:16px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4f1ea; --panel:#fffdf9; --panel2:#f7f4ec; --raise:#ffffff;
+      --ink:#211f2a; --mut:#6d6878; --faint:#9a95a3; --line:#e7e1d5; --line2:#ddd6c8;
+      --accent:#e04e2f; --accent-soft:rgba(224,78,47,.10); --accent-ink:#c8431f;
+      --good:#2e9e6b; --good-soft:rgba(46,158,107,.12); --bad:#d6455c; --bad-soft:rgba(214,69,92,.09);
+      --shadow-sm:0 8px 24px -14px rgba(70,55,40,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;
+    -webkit-font-smoothing:antialiased;line-height:1.62;letter-spacing:-.01em;word-break:keep-all}
+  ::selection{background:var(--accent-soft);color:var(--accent-ink)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 90px}
+  button{font-family:inherit}
+
+  header.top{display:flex;align-items:center;gap:13px;padding:18px 0 14px;position:sticky;top:0;z-index:30;
+    background:linear-gradient(180deg,var(--bg) 72%,transparent)}
+  .mark{width:42px;height:42px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;font-size:20px;
+    background:var(--ink);color:var(--bg)}
+  .brand h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:700;letter-spacing:-.02em}
+  .brand h1 .q{color:var(--accent)}
+  .brand p{margin:0;color:var(--mut);font-size:12px}
+  .prog{margin-left:auto;text-align:right;min-width:120px}
+  .prog small{color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums}
+  .prog .track{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+  .prog .fill{height:100%;width:0;background:var(--accent);transition:width .5s}
+
+  .hero{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+  .hero .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .hero h2{font-family:var(--serif);font-size:25px;line-height:1.24;margin:0 0 8px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .hero p{margin:0 0 16px;color:var(--mut);font-size:13.5px}
+  .stats{display:flex;gap:26px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  .stat .n{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .stat .n.acc{color:var(--accent)}
+  .stat .l{font-size:11px;color:var(--faint);margin-top:3px}
+
+  .sec-label{display:flex;align-items:center;gap:10px;margin:20px 2px 12px}
+  .sec-label h3{margin:0;font-size:14px;font-weight:700}
+  .sec-label .rule{flex:1;height:1px;background:var(--line)}
+
+  .ch-list{display:flex;flex-direction:column;gap:9px}
+  .ch-item{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:14px 16px;cursor:pointer;transition:transform .13s,border-color .13s}
+  .ch-item:hover{transform:translateX(3px);border-color:var(--accent)}
+  .ch-num{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--accent);flex:0 0 auto;width:26px;font-variant-numeric:tabular-nums}
+  .ch-meta{flex:1;min-width:0}
+  .ch-meta .t{font-size:15px;font-weight:700}
+  .ch-meta .e{font-size:11.5px;color:var(--mut)}
+  .ch-chk{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;font-size:11px;color:transparent}
+  .ch-item.done .ch-chk{background:var(--good);border-color:var(--good);color:#fff}
+
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mode{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;cursor:pointer;text-align:left;transition:transform .13s,border-color .13s}
+  .mode:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .mode .mi{font-size:22px}
+  .mode .mt{font-weight:700;font-size:15px;margin-top:8px}
+  .mode .md{color:var(--mut);font-size:12px;margin-top:2px}
+  .mode.wide{grid-column:1 / -1}
+  .mode:disabled{opacity:.5;cursor:default;transform:none}
+
+  .back{display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--mut);
+    font-size:13.5px;cursor:pointer;padding:16px 0 8px;font-weight:600}
+  .back:hover{color:var(--accent)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:13px;box-shadow:var(--shadow-sm)}
+  .box h4{margin:0 0 11px;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--mut);text-transform:uppercase}
+  .lead{font-size:15.5px;line-height:1.75}
+  .lead b,.tip b{color:var(--accent-ink);font-weight:700}
+  .ch-head .u-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink)}
+  .ch-title{font-family:var(--serif);margin:9px 0 2px;font-size:24px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .ch-sub{margin:0 0 6px;color:var(--mut);font-size:13.5px}
+  .pat{padding:11px 0;border-top:1px solid var(--line)}
+  .pat:first-of-type{border-top:none;padding-top:2px}
+  .pat .pe{font-family:var(--serif);font-weight:700;font-size:15.5px}
+  .pat .pk{color:var(--mut);font-size:12.5px;margin-top:1px}
+  .ex-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+  .ex-row:first-of-type{border-top:none;padding-top:2px}
+  .ex-row .et{flex:1}
+  .ex-row .ee{font-size:15px;font-weight:600}
+  .ex-row .ek{color:var(--mut);font-size:12.5px}
+  .say{flex:0 0 auto;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--accent-ink);cursor:pointer;font-size:15px;display:grid;place-items:center;transition:all .13s}
+  .say:hover{background:var(--accent);color:#fff;border-color:transparent}
+  .tip{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13.5px;color:var(--ink)}
+  .tip .th{font-weight:800;color:var(--accent-ink);margin-right:5px}
+  .ch-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:11px 17px;
+    cursor:pointer;font-size:14px;font-weight:600;transition:all .12s}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  /* Quiz runner */
+  .q-top{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .q-top .qbar{flex:1;height:7px;background:var(--line);border-radius:99px;overflow:hidden}
+  .q-top .qfill{height:100%;width:0;background:var(--accent);transition:width .35s}
+  .q-top .qmeta{font-size:12px;color:var(--mut);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .q-cat{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.04em;margin:14px 0 4px;text-transform:uppercase}
+  .q-text{font-size:17px;font-weight:600;line-height:1.55;margin-bottom:14px}
+  .q-text .blank{color:var(--accent-ink);font-weight:800;letter-spacing:1px}
+  .opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:11px;padding:13px 15px;margin-bottom:9px;cursor:pointer;font-size:15px;transition:all .12s}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt.correct{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:700}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .explain{font-size:13.5px;color:var(--mut);margin-top:8px;padding:12px 14px;background:var(--panel2);
+    border-left:3px solid var(--accent);border-radius:9px;display:none}
+  .explain.show{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .q-actions{margin-top:14px;text-align:right}
+  .result{text-align:center;padding:14px 6px}
+  .result .big{font-family:var(--serif);font-size:44px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .result .msg{color:var(--mut);margin:2px 0 16px}
+  .rev{text-align:left;margin-top:14px}
+  .rev .rh{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px}
+  .rev-item{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;background:var(--panel2)}
+  .rev-item .rq{font-size:14px;font-weight:600}
+  .rev-item .ra{font-size:13px;margin-top:5px}
+  .rev-item .ra .ok{color:var(--good);font-weight:700}
+  .rev-item .rx{font-size:12.5px;color:var(--mut);margin-top:3px}
+  .result-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .footer-note{text-align:center;color:var(--faint);font-size:11px;margin-top:26px;line-height:1.7}
+  .footer-note a{color:var(--accent-ink)}
+  @media(max-width:520px){.wrap{padding:0 13px 80px}.modes{grid-template-columns:1fr}.hero h2{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="mark">❓</div>
+    <div class="brand">
+      <h1>의문문 마스터<span class="q">?</span></h1>
+      <p>질문을 완벽하게 · 인터랙티브 전자책</p>
+    </div>
+    <div class="prog">
+      <small><span id="chDone">0</span> / <span id="chTotal">0</span> 챕터</small>
+      <div class="track"><div class="fill" id="progFill"></div></div>
+    </div>
+  </header>
+  <main id="app"></main>
+  <div class="footer-note">
+    회화 중심 오리지널 학습 콘텐츠 · 발음 듣기 🔊 는 브라우저 음성 기능(Chrome 권장) ·
+    <a href="https://gywn000929-bot.github.io/english-speak/">← 전체 145유닛 앱으로</a>
+  </div>
+</div>
+
+<script type="application/json" id="chapterData">__CHAPTERS_JSON__</script>
+<script type="application/json" id="qbankData">__QBANK_JSON__</script>
+<script>
+const CHAPTERS = JSON.parse(document.getElementById("chapterData").textContent);
+const QBANK = JSON.parse(document.getElementById("qbankData").textContent);
+const CAT_LABELS = {
+  c1:"Yes/No 의문문", c2:"Wh- 의문사", c3:"How 의문문", c4:"주어·목적어 의문문",
+  c5:"부정·부가의문문", c6:"간접의문문", c7:"전달 의문문(화법)", c8:"전치사·What about", c9:"의문사+to·선택·되묻기"
+};
+const CAT_ORDER = ["c1","c2","c3","c4","c5","c6","c7","c8","c9"];
+
+document.getElementById("chTotal").textContent = CHAPTERS.length;
+
+const KEY="qmaster_v1";
+let store={read:{},wrong:[]};
+try{ store = Object.assign(store, JSON.parse(localStorage.getItem(KEY))||{}); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+const app = document.getElementById("app");
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+let voices=[]; function lv(){ voices = window.speechSynthesis?speechSynthesis.getVoices():[]; }
+if(window.speechSynthesis){ lv(); speechSynthesis.onvoiceschanged=lv; }
+function speak(t,rate=0.95){ if(!window.speechSynthesis)return; speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=rate;
+  const v=voices.find(v=>/en-US/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang)); if(v)u.voice=v; speechSynthesis.speak(u); }
+
+function refreshProg(){
+  const d=Object.keys(store.read).filter(k=>store.read[k]).length;
+  document.getElementById("chDone").textContent=d;
+  document.getElementById("progFill").style.width=(d/CHAPTERS.length*100)+"%";
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- HOME ---------- */
+function home(){
+  refreshProg();
+  const chItems = CHAPTERS.map((c,i)=>`
+    <div class="ch-item ${store.read[c.id]?'done':''}" onclick="reader(${i})">
+      <div class="ch-num">${i+1}</div>
+      <div class="ch-meta"><div class="t">${c.title}</div><div class="e">${c.en}</div></div>
+      <div class="ch-chk">✓</div>
+    </div>`).join("");
+  const wrongN = store.wrong.length;
+  app.innerHTML = `
+    <div class="hero">
+      <p class="eyebrow">Master English Questions</p>
+      <h2>의문문, 정말 못 하는 질문이 없도록</h2>
+      <p>10개 챕터로 모든 유형을 익히고, ${QBANK.length}개 문제로 완벽하게 연습해요. 틀린 문제는 자동으로 오답노트에 모입니다.</p>
+      <div class="stats">
+        <div class="stat"><div class="n">${CHAPTERS.length}</div><div class="l">학습 챕터</div></div>
+        <div class="stat"><div class="n acc">${QBANK.length}</div><div class="l">연습 문제</div></div>
+        <div class="stat"><div class="n">${CAT_ORDER.length}</div><div class="l">유형</div></div>
+      </div>
+    </div>
+    <div class="sec-label"><h3>📖 학습 챕터</h3><span class="rule"></span></div>
+    <div class="ch-list">${chItems}</div>
+    <div class="sec-label"><h3>✏️ 퀴즈</h3><span class="rule"></span></div>
+    <div class="modes">
+      <button class="mode wide primary-hint" onclick="startTest()" style="border-color:var(--accent)">
+        <div class="mi">🎯</div><div class="mt">종합 테스트 (랜덤 20문제)</div>
+        <div class="md">모든 유형에서 무작위 20문제 · 끝나면 점수와 오답 리뷰</div></button>
+      <button class="mode" onclick="drillMenu()"><div class="mi">🗂️</div><div class="mt">유형별 연습</div><div class="md">9개 유형 골라서 집중 훈련</div></button>
+      <button class="mode" onclick="startWrong()" ${wrongN?'':'disabled'}><div class="mi">🔁</div><div class="mt">오답 다시풀기</div><div class="md">${wrongN?wrongN+'문제 대기 중':'아직 없음'}</div></button>
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- READER ---------- */
+function reader(i){
+  const c = CHAPTERS[i];
+  const pats = (c.patterns||[]).map(p=>`<div class="pat"><div class="pe">${p.en}</div><div class="pk">${p.ko}</div></div>`).join("");
+  const exs = (c.examples||[]).map(e=>`
+    <div class="ex-row"><div class="et"><div class="ee">${e.en}</div><div class="ek">${e.ko}</div></div>
+      <button class="say" onclick="speak('${esc(e.en)}')">🔊</button></div>`).join("");
+  app.innerHTML = `
+    <button class="back" onclick="home()">← 목차</button>
+    <div class="ch-head"><span class="u-tag">CHAPTER ${i+1} / ${CHAPTERS.length}</span></div>
+    <h2 class="ch-title">${c.title}</h2>
+    <p class="ch-sub">${c.en}</p>
+    <div class="box"><h4>개념</h4><p class="lead">${c.intro}</p></div>
+    <div class="box"><h4>핵심 패턴</h4>${pats}</div>
+    <div class="box"><h4>예문 듣기</h4>${exs}</div>
+    <div class="box"><div class="tip"><span class="th">이것만은!</span>${c.tip}</div></div>
+    <button class="btn primary" style="width:100%;margin-bottom:12px" onclick="markRead('${c.id}')">✓ 이 챕터 학습 완료</button>
+    <div class="ch-nav">
+      <button class="btn" ${i===0?'disabled':''} onclick="reader(${i-1})">← 이전 챕터</button>
+      <button class="btn" ${i===CHAPTERS.length-1?'disabled':''} onclick="reader(${i+1})">다음 챕터 →</button>
+    </div>`;
+  window.scrollTo(0,0);
+}
+function markRead(id){ store.read[id]=true; save(); home(); }
+
+/* ---------- DRILL MENU ---------- */
+function drillMenu(){
+  const rows = CAT_ORDER.map(k=>{
+    const n = QBANK.filter(q=>q.cat===k).length;
+    return `<div class="ch-item" onclick="startCat('${k}')">
+      <div class="ch-num">▷</div>
+      <div class="ch-meta"><div class="t">${CAT_LABELS[k]}</div><div class="e">${n}문제</div></div>
+      <div class="ch-chk" style="border:none;color:var(--faint)">›</div></div>`;
+  }).join("");
+  app.innerHTML = `<button class="back" onclick="home()">← 홈</button>
+    <h2 class="ch-title" style="font-size:22px">🗂️ 유형별 연습</h2>
+    <p class="ch-sub">한 유형을 골라 집중적으로 훈련하세요.</p>
+    <div class="ch-list" style="margin-top:12px">${rows}</div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- QUIZ RUNNER ---------- */
+let Q={list:[],i:0,score:0,wrong:[],title:"",answered:false};
+function startCat(k){ runQuiz(shuffle(QBANK.filter(q=>q.cat===k)), CAT_LABELS[k]); }
+function startTest(){ runQuiz(shuffle(QBANK).slice(0,20), "종합 테스트"); }
+function startWrong(){
+  const set=new Set(store.wrong);
+  const list=QBANK.filter(q=>set.has(q.id));
+  if(!list.length){ home(); return; }
+  runQuiz(shuffle(list), "오답 다시풀기");
+}
+function runQuiz(list,title){ Q={list,i:0,score:0,wrong:[],title,answered:false}; renderQ(); }
+function renderQ(){
+  if(Q.i>=Q.list.length){ return renderResult(); }
+  const q=Q.list[Q.i], n=Q.list.length;
+  Q.answered=false;
+  const opts=q.opts.map((o,oi)=>`<button class="opt" id="opt${oi}" onclick="pick(${oi})">${o}</button>`).join("");
+  app.innerHTML=`<button class="back" onclick="home()">← 홈 (그만두기)</button>
+    <div class="q-top"><div class="qbar"><div class="qfill" id="qfill" style="width:${(Q.i)/n*100}%"></div></div>
+      <span class="qmeta">${Q.i+1} / ${n} · ✓${Q.score}</span></div>
+    <div class="q-cat">${Q.title} · ${CAT_LABELS[q.cat]||''}</div>
+    <div class="q-text">${String(q.q).replace(/___/g,'<span class="blank">____</span>')}</div>
+    <div id="opts">${opts}</div>
+    <div class="explain" id="exp">💡 ${q.ex}</div>
+    <div class="q-actions"><button class="btn primary" id="nextBtn" style="display:none" onclick="nextQ()">${Q.i===n-1?'결과 보기 →':'다음 →'}</button></div>`;
+  window.scrollTo(0,0);
+}
+function pick(oi){
+  if(Q.answered) return; Q.answered=true;
+  const q=Q.list[Q.i], correct=q.a;
+  document.querySelectorAll(".opt").forEach((b,i)=>{ b.disabled=true;
+    if(i===correct)b.classList.add("correct");
+    if(i===oi&&oi!==correct)b.classList.add("wrong"); });
+  document.getElementById("exp").classList.add("show");
+  document.getElementById("nextBtn").style.display="inline-block";
+  const ok = oi===correct;
+  if(ok){ Q.score++; store.wrong = store.wrong.filter(x=>x!==q.id); }
+  else { Q.wrong.push({q, chosen:oi}); if(!store.wrong.includes(q.id)) store.wrong.push(q.id); }
+  save();
+  const qf=document.getElementById("qfill"); if(qf) qf.style.width=((Q.i+1)/Q.list.length*100)+"%";
+}
+function nextQ(){ Q.i++; renderQ(); }
+function renderResult(){
+  const n=Q.list.length, pct=Math.round(Q.score/n*100);
+  const msg = pct===100?'완벽해요! 🎉 못 푸는 질문이 없네요.':pct>=80?'훌륭해요! 👏 거의 다 왔어요.':pct>=60?'좋아요 👍 오답을 다시 보면 확실해져요.':'괜찮아요 💪 오답노트로 복습해요.';
+  const rev = Q.wrong.length ? `<div class="rev"><div class="rh">틀린 문제 다시 보기 (${Q.wrong.length})</div>`+
+    Q.wrong.map(w=>`<div class="rev-item">
+      <div class="rq">${String(w.q.q).replace(/___/g,'____')}</div>
+      <div class="ra">정답: <span class="ok">${w.q.opts[w.q.a]}</span> · 내 답: ${w.q.opts[w.chosen]}</div>
+      <div class="rx">💡 ${w.q.ex}</div></div>`).join("")+`</div>` : `<p class="ch-sub" style="text-align:center">전부 맞혔어요! 오답이 없습니다 🙌</p>`;
+  app.innerHTML=`<button class="back" onclick="home()">← 홈</button>
+    <div class="box"><div class="result">
+      <div class="big">${Q.score} / ${n}</div><div class="msg">${msg}</div>
+      <div class="result-btns">
+        ${Q.wrong.length?`<button class="btn primary" onclick="runQuiz(shuffle([${Q.wrong.map(w=>JSON.stringify(w.q.id)).join(',')}].map(id=>QBANK.find(q=>q.id===id))),'오답 다시풀기')">🔁 틀린 것만 다시</button>`:''}
+        <button class="btn" onclick="home()">홈으로</button>
+      </div>
+    </div>${rev}</div>`;
+  window.scrollTo(0,0);
+}
+
+home();
+</script>
+</body>
+</html>

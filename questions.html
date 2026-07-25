@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>의문문 마스터 · 인터랙티브 전자책</title>
+<style>
+  :root{
+    --sans:'Segoe UI',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    --serif:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,'Nanum Myeongjo',serif;
+    --bg:#141219; --panel:#1c1a24; --panel2:#232029; --raise:#2a2632;
+    --ink:#f2eff7; --mut:#a29daf; --faint:#726d7e; --line:#302c39; --line2:#3b3646;
+    --accent:#ff6551; --accent-soft:rgba(255,101,81,.14); --accent-ink:#ff8574;
+    --good:#43c88a; --good-soft:rgba(67,200,138,.15); --bad:#ff6b81; --bad-soft:rgba(255,107,129,.13);
+    --shadow-sm:0 6px 22px -12px rgba(0,0,0,.6); --r:16px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4f1ea; --panel:#fffdf9; --panel2:#f7f4ec; --raise:#ffffff;
+      --ink:#211f2a; --mut:#6d6878; --faint:#9a95a3; --line:#e7e1d5; --line2:#ddd6c8;
+      --accent:#e04e2f; --accent-soft:rgba(224,78,47,.10); --accent-ink:#c8431f;
+      --good:#2e9e6b; --good-soft:rgba(46,158,107,.12); --bad:#d6455c; --bad-soft:rgba(214,69,92,.09);
+      --shadow-sm:0 8px 24px -14px rgba(70,55,40,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;
+    -webkit-font-smoothing:antialiased;line-height:1.62;letter-spacing:-.01em;word-break:keep-all}
+  ::selection{background:var(--accent-soft);color:var(--accent-ink)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 90px}
+  button{font-family:inherit}
+
+  header.top{display:flex;align-items:center;gap:13px;padding:18px 0 14px;position:sticky;top:0;z-index:30;
+    background:linear-gradient(180deg,var(--bg) 72%,transparent)}
+  .mark{width:42px;height:42px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;font-size:20px;
+    background:var(--ink);color:var(--bg)}
+  .brand h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:700;letter-spacing:-.02em}
+  .brand h1 .q{color:var(--accent)}
+  .brand p{margin:0;color:var(--mut);font-size:12px}
+  .prog{margin-left:auto;text-align:right;min-width:120px}
+  .prog small{color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums}
+  .prog .track{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+  .prog .fill{height:100%;width:0;background:var(--accent);transition:width .5s}
+
+  .hero{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+  .hero .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .hero h2{font-family:var(--serif);font-size:25px;line-height:1.24;margin:0 0 8px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .hero p{margin:0 0 16px;color:var(--mut);font-size:13.5px}
+  .stats{display:flex;gap:26px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  .stat .n{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .stat .n.acc{color:var(--accent)}
+  .stat .l{font-size:11px;color:var(--faint);margin-top:3px}
+
+  .sec-label{display:flex;align-items:center;gap:10px;margin:20px 2px 12px}
+  .sec-label h3{margin:0;font-size:14px;font-weight:700}
+  .sec-label .rule{flex:1;height:1px;background:var(--line)}
+
+  .ch-list{display:flex;flex-direction:column;gap:9px}
+  .ch-item{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:14px 16px;cursor:pointer;transition:transform .13s,border-color .13s}
+  .ch-item:hover{transform:translateX(3px);border-color:var(--accent)}
+  .ch-num{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--accent);flex:0 0 auto;width:26px;font-variant-numeric:tabular-nums}
+  .ch-meta{flex:1;min-width:0}
+  .ch-meta .t{font-size:15px;font-weight:700}
+  .ch-meta .e{font-size:11.5px;color:var(--mut)}
+  .ch-chk{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;font-size:11px;color:transparent}
+  .ch-item.done .ch-chk{background:var(--good);border-color:var(--good);color:#fff}
+
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mode{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;cursor:pointer;text-align:left;transition:transform .13s,border-color .13s}
+  .mode:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .mode .mi{font-size:22px}
+  .mode .mt{font-weight:700;font-size:15px;margin-top:8px}
+  .mode .md{color:var(--mut);font-size:12px;margin-top:2px}
+  .mode.wide{grid-column:1 / -1}
+  .mode:disabled{opacity:.5;cursor:default;transform:none}
+
+  .back{display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--mut);
+    font-size:13.5px;cursor:pointer;padding:16px 0 8px;font-weight:600}
+  .back:hover{color:var(--accent)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:13px;box-shadow:var(--shadow-sm)}
+  .box h4{margin:0 0 11px;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--mut);text-transform:uppercase}
+  .lead{font-size:15.5px;line-height:1.75}
+  .lead b,.tip b{color:var(--accent-ink);font-weight:700}
+  .ch-head .u-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink)}
+  .ch-title{font-family:var(--serif);margin:9px 0 2px;font-size:24px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .ch-sub{margin:0 0 6px;color:var(--mut);font-size:13.5px}
+  .pat{padding:11px 0;border-top:1px solid var(--line)}
+  .pat:first-of-type{border-top:none;padding-top:2px}
+  .pat .pe{font-family:var(--serif);font-weight:700;font-size:15.5px}
+  .pat .pk{color:var(--mut);font-size:12.5px;margin-top:1px}
+  .ex-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+  .ex-row:first-of-type{border-top:none;padding-top:2px}
+  .ex-row .et{flex:1}
+  .ex-row .ee{font-size:15px;font-weight:600}
+  .ex-row .ek{color:var(--mut);font-size:12.5px}
+  .say{flex:0 0 auto;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--accent-ink);cursor:pointer;font-size:15px;display:grid;place-items:center;transition:all .13s}
+  .say:hover{background:var(--accent);color:#fff;border-color:transparent}
+  .tip{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13.5px;color:var(--ink)}
+  .tip .th{font-weight:800;color:var(--accent-ink);margin-right:5px}
+  .ch-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:11px 17px;
+    cursor:pointer;font-size:14px;font-weight:600;transition:all .12s}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  /* Quiz runner */
+  .q-top{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .q-top .qbar{flex:1;height:7px;background:var(--line);border-radius:99px;overflow:hidden}
+  .q-top .qfill{height:100%;width:0;background:var(--accent);transition:width .35s}
+  .q-top .qmeta{font-size:12px;color:var(--mut);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .q-cat{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.04em;margin:14px 0 4px;text-transform:uppercase}
+  .q-text{font-size:17px;font-weight:600;line-height:1.55;margin-bottom:14px}
+  .q-text .blank{color:var(--accent-ink);font-weight:800;letter-spacing:1px}
+  .opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:11px;padding:13px 15px;margin-bottom:9px;cursor:pointer;font-size:15px;transition:all .12s}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt.correct{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:700}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .explain{font-size:13.5px;color:var(--mut);margin-top:8px;padding:12px 14px;background:var(--panel2);
+    border-left:3px solid var(--accent);border-radius:9px;display:none}
+  .explain.show{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .q-actions{margin-top:14px;text-align:right}
+  .result{text-align:center;padding:14px 6px}
+  .result .big{font-family:var(--serif);font-size:44px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .result .msg{color:var(--mut);margin:2px 0 16px}
+  .rev{text-align:left;margin-top:14px}
+  .rev .rh{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px}
+  .rev-item{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;background:var(--panel2)}
+  .rev-item .rq{font-size:14px;font-weight:600}
+  .rev-item .ra{font-size:13px;margin-top:5px}
+  .rev-item .ra .ok{color:var(--good);font-weight:700}
+  .rev-item .rx{font-size:12.5px;color:var(--mut);margin-top:3px}
+  .result-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .footer-note{text-align:center;color:var(--faint);font-size:11px;margin-top:26px;line-height:1.7}
+  .footer-note a{color:var(--accent-ink)}
+  @media(max-width:520px){.wrap{padding:0 13px 80px}.modes{grid-template-columns:1fr}.hero h2{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="mark">❓</div>
+    <div class="brand">
+      <h1>의문문 마스터<span class="q">?</span></h1>
+      <p>질문을 완벽하게 · 인터랙티브 전자책</p>
+    </div>
+    <div class="prog">
+      <small><span id="chDone">0</span> / <span id="chTotal">0</span> 챕터</small>
+      <div class="track"><div class="fill" id="progFill"></div></div>
+    </div>
+  </header>
+  <main id="app"></main>
+  <div class="footer-note">
+    회화 중심 오리지널 학습 콘텐츠 · 발음 듣기 🔊 는 브라우저 음성 기능(Chrome 권장) ·
+    <a href="https://gywn000929-bot.github.io/english-speak/">← 전체 145유닛 앱으로</a>
+  </div>
+</div>
+
+<script type="application/json" id="chapterData">[{"id":"ch1","title":"의문문의 뼈대: 어순","en":"How questions are built","intro":"영어 의문문의 핵심은 \u003cb>주어와 (조)동사의 자리 바꾸기\u003c/b>예요. be동사·조동사는 주어 앞으로 나가고, 일반동사는 \u003cb>do/does/did\u003c/b>의 도움을 받습니다. 크게 \u003cb>Yes/No 의문문\u003c/b>과 \u003cb>의문사(Wh-) 의문문\u003c/b> 두 갈래예요.","patterns":[{"en":"Be + 주어 ~?","ko":"Are you ready? / Is she home?"},{"en":"Do/Does/Did + 주어 + 동사원형 ~?","ko":"Do you know? / Did he call?"},{"en":"의문사 + (조)동사 + 주어 ~?","ko":"Where do you live?"}],"examples":[{"en":"Are you free tonight?","ko":"오늘 밤 시간 있어?"},{"en":"Do you speak English?","ko":"영어 할 줄 알아?"},{"en":"Where does she work?","ko":"그녀는 어디서 일해?"},{"en":"Can you help me for a second?","ko":"잠깐 도와줄 수 있어?"}],"tip":"일반동사 의문문에서는 do/does/did 뒤 동사를 반드시 \u003cb>원형\u003c/b>으로! (Does she \u003cb>works\u003c/b>? ✗ → Does she \u003cb>work\u003c/b>? ✓)"},{"id":"ch2","title":"Yes/No 의문문과 짧은 대답","en":"Yes/No questions & short answers","intro":"예/아니오로 답하는 의문문이에요. 물어본 \u003cb>(조)동사를 그대로 받아\u003c/b> 짧게 답합니다. 'Yes, I do. / No, she isn't.' 처럼요.","patterns":[{"en":"Do you ~? → Yes, I do. / No, I don't.","ko":"일반동사"},{"en":"Are you ~? → Yes, I am. / No, I'm not.","ko":"be동사"},{"en":"Have you ~? → Yes, I have. / No, I haven't.","ko":"완료·조동사"}],"examples":[{"en":"Do you like coffee? Yes, I do.","ko":"커피 좋아해? 응, 좋아해."},{"en":"Is it raining? No, it isn't.","ko":"비 와? 아니, 안 와."},{"en":"Have you eaten? Yes, I have.","ko":"밥 먹었어? 응, 먹었어."},{"en":"Can you swim? No, I can't.","ko":"수영할 줄 알아? 아니, 못 해."}],"tip":"짧은 대답에서 \u003cb>물어본 조동사를 그대로\u003c/b> 받아요. 'Do you ~?'에 'Yes, I am.'은 ✗ → 'Yes, I do.' ✓"},{"id":"ch3","title":"Wh- 의문사로 묻기","en":"who / what / which / whose / where / when / why","intro":"구체적인 정보를 물을 땐 \u003cb>의문사\u003c/b>를 문장 맨 앞에 두고 그 뒤는 Yes/No 의문문 어순과 같아요. \u003cb>what\u003c/b>은 범위가 열려 있고 \u003cb>which\u003c/b>는 정해진 선택지 중에서 고를 때 써요.","patterns":[{"en":"의문사 + do/does/did + 주어 + 동사원형?","ko":"What do you want?"},{"en":"which + (명사): 선택지 중에서","ko":"Which color do you like?"},{"en":"whose + 명사: 누구의 ~","ko":"Whose bag is this?"}],"examples":[{"en":"What do you do on weekends?","ko":"주말에 뭐 해?"},{"en":"Which one do you prefer, tea or coffee?","ko":"차랑 커피 중 뭐가 더 좋아?"},{"en":"Whose turn is it?","ko":"누구 차례야?"},{"en":"Why are you so quiet today?","ko":"오늘 왜 이렇게 조용해?"}],"tip":"열린 질문은 \u003cb>what\u003c/b>, 정해진 선택지는 \u003cb>which\u003c/b>. 'Which do you want, this or that?'처럼 선택지가 있으면 which!"},{"id":"ch4","title":"How 의문문","en":"how + adjective / adverb","intro":"\u003cb>How\u003c/b>는 방법·상태를 묻고, 뒤에 형용사/부사를 붙이면 정도·수량을 물어요. \u003cb>how much\u003c/b>(양·가격), \u003cb>how many\u003c/b>(수), \u003cb>how long\u003c/b>(길이·기간), \u003cb>how often\u003c/b>(빈도), \u003cb>how far\u003c/b>(거리) 등 회화에서 매일 씁니다.","patterns":[{"en":"How + 형용사/부사 + 의문문?","ko":"How old are you?"},{"en":"How much/many + (명사) ~?","ko":"How many books do you have?"},{"en":"How long/often/far ~?","ko":"How long does it take?"}],"examples":[{"en":"How much is this?","ko":"이거 얼마예요?"},{"en":"How many people are coming?","ko":"몇 명이나 와?"},{"en":"How often do you exercise?","ko":"얼마나 자주 운동해?"},{"en":"How long have you lived here?","ko":"여기 얼마나 오래 살았어?"}],"tip":"셀 수 있으면 \u003cb>how many\u003c/b>, 셀 수 없으면 \u003cb>how much\u003c/b>. (how many \u003cb>waters\u003c/b> ✗ → how much water ✓)"},{"id":"ch5","title":"주어 의문문 vs 목적어 의문문","en":"Who broke it? vs Who did you meet?","intro":"이게 한국인이 가장 많이 헷갈리는 부분! 의문사가 \u003cb>주어\u003c/b>이면 do/does/did를 \u003cb>쓰지 않고\u003c/b> 바로 동사가 와요. 의문사가 \u003cb>목적어\u003c/b>이면 보통의 의문문 어순(do/did 사용)입니다.","patterns":[{"en":"주어 의문문: Who + 동사 ~? (do 없음)","ko":"Who called you? / What happened?"},{"en":"목적어 의문문: Who + did + 주어 + 동사원형 ~?","ko":"Who did you call?"}],"examples":[{"en":"Who broke the window?","ko":"누가 창문 깼어? (누가 = 주어)"},{"en":"Who did you invite?","ko":"누구를 초대했어? (누구를 = 목적어)"},{"en":"What happened last night?","ko":"어젯밤에 무슨 일 있었어?"},{"en":"What did she say to you?","ko":"그녀가 너한테 뭐라고 했어?"}],"tip":"의문사가 주어면 \u003cb>did를 넣지 마세요\u003c/b>. 'Who \u003cb>did\u003c/b> call you?' ✗ → 'Who called you?' ✓"},{"id":"ch6","title":"부정의문문과 대답의 함정","en":"Negative questions & Yes/No traps","intro":"'Don't you ~? / Isn't it ~?'처럼 부정으로 물으면 놀람·확인·권유의 느낌이 나요. 가장 중요한 건 \u003cb>대답\u003c/b>! 영어는 질문이 부정이든 아니든, \u003cb>내용이 긍정이면 Yes, 부정이면 No\u003c/b>로 답합니다(한국어와 반대일 때가 많아요).","patterns":[{"en":"Don't you ~? / Aren't you ~? / Isn't it ~?","ko":"확인·놀람"},{"en":"사실이 긍정 → Yes (+긍정)","ko":"Yes, I do."},{"en":"사실이 부정 → No (+부정)","ko":"No, I don't."}],"examples":[{"en":"Don't you like it? Yes, I do! (사실 좋아함)","ko":"이거 안 좋아해? — 아니, 좋아해!"},{"en":"Aren't you tired? No, I'm not.","ko":"안 피곤해? — 응, 안 피곤해."},{"en":"Isn't this seat taken? No, it's free.","ko":"이 자리 주인 없어요? — 네, 비어 있어요."},{"en":"Didn't you get my message?","ko":"내 메시지 못 받았어?"}],"tip":"한국어 '응/아니'에 끌리지 말고 \u003cb>사실\u003c/b>로 판단! 좋아하면 무조건 Yes, 안 하면 무조건 No."},{"id":"ch7","title":"부가의문문 (question tags)","en":"..., isn't it? / ..., do you?","intro":"문장 끝에 붙여 '그렇지?' 하고 확인하는 꼬리표예요. 규칙은 간단! \u003cb>긍정문에는 부정 태그, 부정문에는 긍정 태그\u003c/b>를 붙이고, 앞 문장의 (조)동사와 주어를 대명사로 받습니다.","patterns":[{"en":"긍정문, + 부정 태그?","ko":"It's cold, isn't it?"},{"en":"부정문, + 긍정 태그?","ko":"You don't smoke, do you?"},{"en":"특수: I'm ~, aren't I? / Let's ~, shall we? / 명령문, will you?","ko":"예외 암기"}],"examples":[{"en":"You're coming, aren't you?","ko":"너 올 거지, 그렇지?"},{"en":"She can drive, can't she?","ko":"걔 운전할 수 있지, 안 그래?"},{"en":"You didn't call him, did you?","ko":"걔한테 전화 안 했지, 그렇지?"},{"en":"Let's take a break, shall we?","ko":"좀 쉬자, 어때?"}],"tip":"앞이 긍정이면 태그는 부정, 앞이 부정이면 태그는 긍정. 조동사가 없으면 \u003cb>do/does/did\u003c/b>로 받아요."},{"id":"ch8","title":"간접의문문 (문장 속 의문문)","en":"Do you know where ...?","intro":"질문을 다른 문장 안에 넣으면 어순이 \u003cb>평서문처럼\u003c/b> 바뀌고 do/does/did가 \u003cb>사라져요\u003c/b>. 'Where is it?' → 'Do you know \u003cb>where it is\u003c/b>?' Yes/No 질문은 \u003cb>if/whether\u003c/b>로 연결합니다.","patterns":[{"en":"Do you know + 의문사 + 주어 + 동사?","ko":"Do you know where she lives?"},{"en":"Could you tell me + 의문사 + 주어 + 동사?","ko":"정중한 부탁"},{"en":"I wonder / Do you know + if/whether + 주어 + 동사","ko":"Yes/No형"}],"examples":[{"en":"Do you know what time it is?","ko":"지금 몇 시인지 알아?"},{"en":"Could you tell me where the station is?","ko":"역이 어디 있는지 알려주시겠어요?"},{"en":"I wonder if he is coming.","ko":"그가 올지 궁금해."},{"en":"I don't know why she left.","ko":"그녀가 왜 떠났는지 모르겠어."}],"tip":"간접의문문 안에서는 \u003cb>도치·do 사용 금지\u003c/b>. 'Do you know where \u003cb>is\u003c/b> the station?' ✗ → 'where the station is' ✓"},{"id":"ch9","title":"전달된 의문문 (화법)","en":"She asked if / where ...","intro":"남이 한 질문을 전할 땐 \u003cb>ask\u003c/b>를 쓰고, Yes/No 질문은 \u003cb>if/whether\u003c/b>, 의문사 질문은 그 \u003cb>의문사\u003c/b>로 잇습니다. 어순은 평서문이고, 전달동사가 과거면 \u003cb>시제가 한 칸 뒤로\u003c/b>(is→was, do→did, will→would) 이동해요.","patterns":[{"en":"asked + (사람) + if/whether + 주어 + 동사(과거로)","ko":"Yes/No 질문"},{"en":"asked + (사람) + 의문사 + 주어 + 동사(과거로)","ko":"Wh- 질문"}],"examples":[{"en":"'Are you ready?' → He asked if I was ready.","ko":"그는 내가 준비됐는지 물었다."},{"en":"'Where do you live?' → She asked me where I lived.","ko":"그녀는 내가 어디 사는지 물었다."},{"en":"'What are you doing?' → He asked what I was doing.","ko":"그는 내가 뭘 하는지 물었다."},{"en":"'Will you come?' → They asked if I would come.","ko":"그들은 내가 올 건지 물었다."}],"tip":"전달동사가 과거면 시제를 뒤로! 그리고 어순은 반드시 \u003cb>평서문\u003c/b>(의문문 도치 없음)."},{"id":"ch10","title":"전치사 의문문 · 그 밖의 질문들","en":"What ... for? / What ... like? / what to do","intro":"회화형 의문문 마무리! 전치사는 보통 \u003cb>문장 끝\u003c/b>으로 갑니다(What are you looking \u003cb>for\u003c/b>?). 그 외 자주 쓰는 \u003cb>What ... like?\u003c/b>(어때?), \u003cb>What/How about ...?\u003c/b>(제안), \u003cb>의문사 + to부정사\u003c/b>(what to do), \u003cb>선택의문문\u003c/b>(A or B?)도 함께 익혀요.","patterns":[{"en":"의문사 ... 전치사? (전치사는 끝으로)","ko":"Who are you talking to?"},{"en":"What is/are ~ like?","ko":"어떤지 묘사 요청"},{"en":"의문사 + to부정사","ko":"I don't know what to do."}],"examples":[{"en":"What are you looking for?","ko":"뭐 찾고 있어?"},{"en":"What's your new job like?","ko":"새 직장 어때?"},{"en":"How about grabbing a coffee?","ko":"커피 한잔 어때?"},{"en":"I'm not sure where to go.","ko":"어디로 가야 할지 모르겠어."}],"tip":"전치사는 대개 \u003cb>문장 끝\u003c/b>. 'For what are you looking?'보다 'What are you looking for?'가 훨씬 자연스러워요."}]</script>
+<script type="application/json" id="qbankData">[{"id":"c1-0","cat":"c1","q":"___ you a student?","opts":["Do","Are","Is"],"a":1,"ex":"주어 you와 함께 be동사 의문문은 Are you로 시작합니다."},{"id":"c1-1","cat":"c1","q":"___ she from Canada?","opts":["Is","Are","Does"],"a":0,"ex":"주어 she(3인칭 단수)의 be동사 의문문은 Is로 시작합니다."},{"id":"c1-2","cat":"c1","q":"'You like coffee.'를 의문문으로: ___ you like coffee?","opts":["Are","Do","Does"],"a":1,"ex":"일반동사 like의 의문문은 주어 you에 맞춰 Do를 씁니다."},{"id":"c1-3","cat":"c1","q":"___ he play soccer on weekends?","opts":["Do","Does","Is"],"a":1,"ex":"주어 he는 3인칭 단수라서 Does를 씁니다."},{"id":"c1-4","cat":"c1","q":"어제 일을 물을 때: ___ they arrive yesterday?","opts":["Do","Does","Did"],"a":2,"ex":"과거 시제 의문문은 주어와 상관없이 Did를 씁니다."},{"id":"c1-5","cat":"c1","q":"'It is raining.'를 의문문으로 바꾸면?","opts":["Is it raining?","Does it raining?","It is raining?"],"a":0,"ex":"be동사 is를 문장 맨 앞으로 보내면 Is it raining?이 됩니다."},{"id":"c1-6","cat":"c1","q":"부탁: ___ you help me, please?","opts":["Do","Are","Can"],"a":2,"ex":"능력이나 부탁을 물을 때는 조동사 Can을 씁니다."},{"id":"c1-7","cat":"c1","q":"경험을 물을 때: ___ you ever been to Japan?","opts":["Have","Do","Are"],"a":0,"ex":"현재완료(경험)는 Have you ever been ...? 형태를 씁니다."},{"id":"c1-8","cat":"c1","q":"'Are you tired?'의 알맞은 짧은 대답은?","opts":["Yes, I do.","Yes, I am.","Yes, I have."],"a":1,"ex":"be동사 Are 질문에는 be동사로 Yes, I am.이라고 답합니다."},{"id":"c1-9","cat":"c1","q":"'Does he like pizza?'의 알맞은 짧은 대답은?","opts":["No, he isn't.","No, he doesn't.","No, he don't."],"a":1,"ex":"does 질문에는 does로 답하며 3인칭 단수는 doesn't를 씁니다."},{"id":"c1-10","cat":"c1","q":"미래 계획을 물을 때: ___ you call me tonight?","opts":["Will","Do","Are"],"a":0,"ex":"미래의 의지나 부탁은 조동사 Will을 사용합니다."},{"id":"c1-11","cat":"c1","q":"조언을 구할 때: ___ I bring an umbrella?","opts":["Do","Should","Am"],"a":1,"ex":"'~해야 할까요?'라고 조언을 구할 때는 Should I를 씁니다."},{"id":"c1-12","cat":"c1","q":"'Have you finished your homework?'의 알맞은 대답은?","opts":["Yes, I have.","Yes, I do.","Yes, I am."],"a":0,"ex":"Have you ...? 질문에는 Yes, I have.로 답합니다."},{"id":"c1-13","cat":"c1","q":"틀린 부분을 고른다면: 'Does she went to school?'","opts":["Does","she","went"],"a":2,"ex":"Does 뒤에는 동사원형이 와야 하므로 went가 아니라 go가 맞습니다."},{"id":"c1-14","cat":"c1","q":"'Was the movie good?'의 알맞은 짧은 대답은?","opts":["No, it isn't.","No, it wasn't.","No, it didn't."],"a":1,"ex":"과거 be동사 Was 질문에는 wasn't로 답합니다."},{"id":"c1-15","cat":"c1","q":"틀린 부분을 고른다면: 'Do you can swim?'","opts":["Do","you","can"],"a":0,"ex":"조동사 can이 이미 있으므로 Do는 필요 없습니다. Can you swim?이 맞습니다."},{"id":"c1-16","cat":"c1","q":"'They didn't call you.'를 확인 의문문으로: ___ they call you?","opts":["Do","Did","Were"],"a":1,"ex":"과거의 일을 묻는 의문문이므로 Did를 씁니다."},{"id":"c1-17","cat":"c1","q":"자연스러운 질문과 대답 짝을 고르세요.","opts":["Can you drive? - Yes, I can.","Can you drive? - Yes, I do.","Can you drive? - Yes, I am."],"a":0,"ex":"조동사 Can 질문에는 같은 조동사 can으로 Yes, I can.이라고 답합니다."},{"id":"c2-0","cat":"c2","q":"___ is that man over there? He looks familiar.","opts":["Who","What","Where"],"a":0,"ex":"사람의 정체를 물을 때는 who(누구)를 씁니다."},{"id":"c2-1","cat":"c2","q":"___ are you doing this weekend?","opts":["Who","What","Whose"],"a":1,"ex":"무엇을 하는지 물을 때는 what(무엇)을 씁니다."},{"id":"c2-2","cat":"c2","q":"___ color do you like better, red or blue?","opts":["What","Which","Who"],"a":1,"ex":"정해진 선택지(빨강/파랑) 중 고를 때는 which를 씁니다."},{"id":"c2-3","cat":"c2","q":"___ bag is this on the table?","opts":["Who","Whose","Which"],"a":1,"ex":"소유(누구의)를 물을 때는 whose + 명사 형태로 씁니다."},{"id":"c2-4","cat":"c2","q":"___ do you live now?","opts":["When","Where","Why"],"a":1,"ex":"장소를 물을 때는 where(어디)를 씁니다."},{"id":"c2-5","cat":"c2","q":"___ does the movie start?","opts":["When","Where","Who"],"a":0,"ex":"시간을 물을 때는 when(언제)을 씁니다."},{"id":"c2-6","cat":"c2","q":"___ are you so tired today?","opts":["How","Why","What"],"a":1,"ex":"이유를 물을 때는 why(왜)를 씁니다."},{"id":"c2-7","cat":"c2","q":"'너는 어제 무엇을 먹었니?'를 영어로 고르세요.","opts":["What did you eat yesterday?","What you did eat yesterday?","Did what you eat yesterday?"],"a":0,"ex":"의문사 + 조동사(did) + 주어 + 동사원형 어순입니다."},{"id":"c2-8","cat":"c2","q":"올바른 어순을 고르세요.","opts":["Where she is going?","Where is she going?","Where going is she?"],"a":1,"ex":"의문사 + be동사 + 주어 + 동사(-ing) 어순이 맞습니다."},{"id":"c2-9","cat":"c2","q":"'그 자전거는 누구의 것이니?'에 알맞은 것은?","opts":["Who bike is that?","Whose bike is that?","Which bike is who?"],"a":1,"ex":"whose는 뒤에 명사를 붙여 소유를 묻습니다: whose bike."},{"id":"c2-10","cat":"c2","q":"___ kind of music do you enjoy?","opts":["What","Which","Whose"],"a":0,"ex":"종류를 물을 때는 what kind of ~를 씁니다."},{"id":"c2-11","cat":"c2","q":"___ time do we need to leave?","opts":["What","When","Which"],"a":0,"ex":"몇 시인지 구체적 시각을 물을 때는 what time을 씁니다."},{"id":"c2-12","cat":"c2","q":"틀린 부분을 고르세요: 'Why you are late?'","opts":["Why","you are","전체가 올바르다"],"a":1,"ex":"의문사 뒤 어순은 are you여야 합니다: Why are you late?"},{"id":"c2-13","cat":"c2","q":"___ of these two shirts should I buy?","opts":["What","Which","Who"],"a":1,"ex":"두 개 중 하나를 고르는 상황이므로 which가 맞습니다."},{"id":"c2-14","cat":"c2","q":"'누가 이 케이크를 만들었니?'를 영어로 고르세요.","opts":["Who made this cake?","Whom this cake made?","What made who cake?"],"a":0,"ex":"who가 주어일 때는 조동사 없이 who + 동사 순서입니다."},{"id":"c2-15","cat":"c2","q":"___ are you crying? Are you okay?","opts":["Where","Why","Whose"],"a":1,"ex":"우는 이유를 묻고 있으므로 why를 씁니다."},{"id":"c2-16","cat":"c2","q":"빈칸에 알맞은 것: '___ is your favorite subject at school?'","opts":["What","Where","When"],"a":0,"ex":"좋아하는 과목(사물)을 물으므로 what을 씁니다."},{"id":"c2-17","cat":"c2","q":"올바른 문장을 고르세요.","opts":["When your birthday is?","When is your birthday?","Your birthday when is?"],"a":1,"ex":"의문사 + be동사 + 주어 어순: When is your birthday?"},{"id":"c3-0","cat":"c3","q":"친구를 만났을 때 안부를 묻는 표현: ___ are you?","opts":["How","What","Where"],"a":0,"ex":"안부 인사는 How are you?로 묻습니다."},{"id":"c3-1","cat":"c3","q":"A: How was your weekend?  B에 알맞은 대답은?","opts":["It was great, thanks.","Yes, I do.","At the park."],"a":0,"ex":"How was...?는 과거의 경험/상태를 물으므로 It was...로 답합니다."},{"id":"c3-2","cat":"c3","q":"가격을 물을 때: ___ is this bag?","opts":["How much","How many","How long"],"a":0,"ex":"가격(불가산)은 How much로 묻습니다."},{"id":"c3-3","cat":"c3","q":"개수를 물을 때: ___ books do you have?","opts":["How many","How much","How often"],"a":0,"ex":"셀 수 있는 명사의 개수는 How many + 복수명사입니다."},{"id":"c3-4","cat":"c3","q":"기간을 물을 때: ___ have you lived here?","opts":["How long","How far","How old"],"a":0,"ex":"기간(얼마나 오래)은 How long으로 묻습니다."},{"id":"c3-5","cat":"c3","q":"빈도를 물을 때: ___ do you exercise?","opts":["How often","How much","How long"],"a":0,"ex":"빈도(얼마나 자주)는 How often으로 묻습니다."},{"id":"c3-6","cat":"c3","q":"나이를 물을 때: ___ is your brother?","opts":["How old","How tall","How big"],"a":0,"ex":"나이는 How old로 묻습니다."},{"id":"c3-7","cat":"c3","q":"거리를 물을 때: ___ is the station from here?","opts":["How far","How long","How much"],"a":0,"ex":"거리(얼마나 먼)는 How far로 묻습니다."},{"id":"c3-8","cat":"c3","q":"키를 물을 때: ___ are you?","opts":["How tall","How big","How high"],"a":0,"ex":"사람의 키는 How tall로 묻습니다."},{"id":"c3-9","cat":"c3","q":"'이 방은 얼마나 커요?'를 영어로: ___ is this room?","opts":["How big","How many","How far"],"a":0,"ex":"크기는 How big으로 묻습니다."},{"id":"c3-10","cat":"c3","q":"방법을 물을 때: ___ do you go to work?","opts":["How","Why","When"],"a":0,"ex":"방법/수단은 How do you...?로 묻습니다."},{"id":"c3-11","cat":"c3","q":"구어에서 이유를 캐물을 때 쓰는 표현: ___ you didn't call me?","opts":["How come","How much","How long"],"a":0,"ex":"How come 뒤에는 평서문 어순(주어+동사)이 옵니다."},{"id":"c3-12","cat":"c3","q":"어색한 문장을 고르세요.","opts":["How many money do you need?","How much money do you need?","How much time do we have?"],"a":0,"ex":"money는 불가산이므로 How much를 써야 합니다."},{"id":"c3-13","cat":"c3","q":"'얼마나 자주 운동해요?'를 자연스럽게 영어로 옮긴 것은?","opts":["How often do you work out?","How long do you work out ago?","How many you work out?"],"a":0,"ex":"빈도는 How often + 조동사 do + 주어 + 동사 순서입니다."},{"id":"c3-14","cat":"c3","q":"A: ___ was the movie?  B: It was boring.","opts":["How","What","Who"],"a":0,"ex":"영화가 어땠는지 상태를 물으므로 How was...?가 자연스럽습니다."},{"id":"c3-15","cat":"c3","q":"밑줄 친 부분이 틀린 문장은?","opts":["How old is this building?","How much is these shoes?","How far is the beach?"],"a":1,"ex":"these shoes는 복수이므로 How much are these shoes?가 맞습니다."},{"id":"c3-16","cat":"c3","q":"A: How come you look so tired?  B로 알맞은 것은?","opts":["Because I didn't sleep well.","Yes, very tired.","In the morning."],"a":0,"ex":"How come은 이유를 물으므로 Because...로 답할 수 있습니다."},{"id":"c3-17","cat":"c3","q":"'거기까지 얼마나 걸려요?'  ___ does it take to get there?","opts":["How long","How far","How often"],"a":0,"ex":"소요 시간은 How long does it take으로 묻습니다."},{"id":"c4-0","cat":"c4","q":"___ broke the window? (범인이 누구인지 묻는 주어 의문문)","opts":["Who did break","Who broke","Whom did break"],"a":1,"ex":"주어를 물을 때는 do/did를 쓰지 않고 Who + 동사(과거형) 형태를 씁니다."},{"id":"c4-1","cat":"c4","q":"Who ___ at the party last night?","opts":["you meet","did you meet","met you did"],"a":1,"ex":"목적어(누구를 만났는지)를 물을 때는 일반 의문문처럼 did you + 동사원형을 씁니다."},{"id":"c4-2","cat":"c4","q":"다음 중 올바른 주어 의문문은?","opts":["What did happen?","What happened?","What did it happened?"],"a":1,"ex":"What이 주어일 때는 did 없이 What happened?로 씁니다."},{"id":"c4-3","cat":"c4","q":"___ she say to the teacher?","opts":["What does said","What did","What"],"a":1,"ex":"목적어(무엇을 말했는지)를 묻는 의문문이므로 did가 필요합니다."},{"id":"c4-4","cat":"c4","q":"틀린 부분을 고르세요: Who did call you this morning?","opts":["맞는 문장이다","call을 called로만","did를 빼서 Who called you로"],"a":2,"ex":"Who가 주어이므로 did를 빼고 Who called you?가 맞습니다."},{"id":"c4-5","cat":"c4","q":"'누가 이 케이크를 만들었니?'를 영어로?","opts":["Who did make this cake?","Who made this cake?","Who this cake made?"],"a":1,"ex":"Who가 주어인 의문문이라 did 없이 Who made this cake?입니다."},{"id":"c4-6","cat":"c4","q":"Who ___ this book? I want to borrow it.","opts":["did write","wrote","did wrote"],"a":1,"ex":"저자(주어)를 물으므로 did 없이 Who wrote?를 씁니다."},{"id":"c4-7","cat":"c4","q":"What ___ you buy at the store?","opts":["made","did","was"],"a":1,"ex":"무엇을 샀는지(목적어)를 묻는 문장이라 did가 필요합니다."},{"id":"c4-8","cat":"c4","q":"올바른 문장을 고르세요.","opts":["What want you?","What you want?","What do you want?"],"a":2,"ex":"목적어 의문문은 What do you + 동사원형 형태입니다."},{"id":"c4-9","cat":"c4","q":"'A: Who lives here? B: ___' 알맞은 대답은?","opts":["My uncle does.","My uncle lives does.","Does my uncle."],"a":0,"ex":"주어를 묻는 Who 질문의 대답은 주어 + does/do로 짧게 답합니다."},{"id":"c4-10","cat":"c4","q":"Who ___ the door? It is so noisy.","opts":["does knocking","is knocking","did knocked"],"a":1,"ex":"Who가 주어인 현재진행 의문문은 Who is knocking?입니다. do를 쓰지 않습니다."},{"id":"c4-11","cat":"c4","q":"다음 중 목적어 의문문으로 알맞은 것은?","opts":["Who did you call?","Who called did you?","Who you did call?"],"a":0,"ex":"목적어를 물을 때는 Who did you + 동사원형 순서입니다."},{"id":"c4-12","cat":"c4","q":"'무슨 일이 있었니?'를 영어로 바르게 옮기면?","opts":["What did happen?","What happened?","What was happen?"],"a":1,"ex":"What이 주어이므로 did 없이 What happened?로 씁니다."},{"id":"c4-13","cat":"c4","q":"Who ___ you to the airport yesterday?","opts":["did drove","do drive","drove"],"a":2,"ex":"'누가 태워다 줬니'는 Who가 주어이므로 did 없이 과거동사 drove를 씁니다."},{"id":"c4-14","cat":"c4","q":"빈칸에 알맞은 것은? What ___ she cooking now?","opts":["is","does","did"],"a":0,"ex":"목적어 의문문의 현재진행형: What is she cooking? be동사를 씁니다."},{"id":"c4-15","cat":"c4","q":"틀린 문장을 고르세요.","opts":["Who wants ice cream?","What did you eat?","Who did wants ice cream?"],"a":2,"ex":"Who가 주어면 did를 쓰지 않으므로 Who did wants는 틀립니다."},{"id":"c4-16","cat":"c4","q":"'너는 무엇을 봤니?'를 영어로?","opts":["What saw you?","What you saw?","What did you see?"],"a":2,"ex":"목적어를 묻는 의문문이라 What did you see?가 맞습니다."},{"id":"c4-17","cat":"c4","q":"Who ___ the most points in the game?","opts":["did score","scored","did scored"],"a":1,"ex":"Who가 주어이므로 did 없이 Who scored?로 씁니다."},{"id":"c5-0","cat":"c5","q":"빈칸: It's very cold today, ___?","opts":["isn't it","is it","doesn't it"],"a":0,"ex":"긍정문 뒤에는 부정 태그. It's ~ 이므로 isn't it."},{"id":"c5-1","cat":"c5","q":"빈칸: You don't smoke, ___?","opts":["do you","don't you","are you"],"a":0,"ex":"부정문 뒤에는 긍정 태그. don't ~ 이므로 do you."},{"id":"c5-2","cat":"c5","q":"'Don't you like coffee?' 라고 물었고 나는 커피를 좋아한다. 올바른 대답은?","opts":["Yes, I do.","No, I do.","No, I don't."],"a":0,"ex":"영어는 사실이 긍정이면 Yes. 좋아하므로 Yes, I do."},{"id":"c5-3","cat":"c5","q":"'Aren't you tired?' 라고 물었고 나는 피곤하지 않다. 올바른 대답은?","opts":["No, I'm not.","Yes, I'm not.","Yes, I am."],"a":0,"ex":"사실이 부정(안 피곤함)이면 No. No, I'm not."},{"id":"c5-4","cat":"c5","q":"빈칸: I am late, ___?","opts":["aren't I","am not I","amn't I"],"a":0,"ex":"I am의 특수 부가의문문은 aren't I."},{"id":"c5-5","cat":"c5","q":"빈칸: Let's take a break, ___?","opts":["shall we","will we","do we"],"a":0,"ex":"Let's ~ 뒤 태그는 shall we."},{"id":"c5-6","cat":"c5","q":"빈칸: Open the window, ___?","opts":["will you","do you","shall you"],"a":0,"ex":"명령문 뒤 태그는 will you."},{"id":"c5-7","cat":"c5","q":"빈칸: She can swim, ___?","opts":["can't she","can she","doesn't she"],"a":0,"ex":"조동사 can + 긍정문이므로 부정 태그 can't she."},{"id":"c5-8","cat":"c5","q":"빈칸: He didn't call you, ___?","opts":["did he","didn't he","does he"],"a":0,"ex":"부정문(didn't) 뒤에는 긍정 태그 did he."},{"id":"c5-9","cat":"c5","q":"틀린 부분을 고르세요: They have finished, haven't them?","opts":["haven't them -> haven't they","have -> has","finished -> finish"],"a":0,"ex":"태그의 대명사는 주어와 일치. them이 아니라 they."},{"id":"c5-10","cat":"c5","q":"'Isn't this seat taken?' 라고 물었고 자리는 비어 있다(안 잡혔다). 올바른 대답은?","opts":["No, it isn't.","Yes, it isn't.","Yes, it is."],"a":0,"ex":"안 잡혔다는 부정 사실이므로 No, it isn't."},{"id":"c5-11","cat":"c5","q":"빈칸(KR->EN): 너 학생이지, 그렇지 않니? You are a student, ___?","opts":["aren't you","are you","don't you"],"a":0,"ex":"be동사 긍정문 뒤 부정 태그 aren't you."},{"id":"c5-12","cat":"c5","q":"빈칸: Nobody called, ___?","opts":["did they","didn't they","did he"],"a":0,"ex":"Nobody는 부정 의미라 긍정 태그, 대명사는 they."},{"id":"c5-13","cat":"c5","q":"'Didn't he pass the exam?' 라고 물었고 그는 시험에 합격했다. 올바른 대답은?","opts":["Yes, he did.","No, he did.","No, he didn't."],"a":0,"ex":"합격이라는 긍정 사실이므로 Yes, he did."},{"id":"c5-14","cat":"c5","q":"빈칸: There is a problem, ___?","opts":["isn't there","isn't it","is there"],"a":0,"ex":"There is 구문의 태그는 there를 사용. isn't there."},{"id":"c5-15","cat":"c5","q":"틀린 부분을 고르세요: You like tea, don't you like?","opts":["don't you like -> don't you","like -> likes","You -> Do you"],"a":0,"ex":"부가의문문 태그에는 본동사를 반복하지 않는다. don't you."},{"id":"c5-16","cat":"c5","q":"빈칸: Let's not argue, ___?","opts":["shall we","will we","shall not we"],"a":0,"ex":"Let's로 시작하는 문장의 태그는 항상 shall we."},{"id":"c5-17","cat":"c5","q":"빈칸: Won't you join us? (좋다는 뜻으로 승낙할 때) ___","opts":["Yes, I'd love to.","No, I'd love to.","No, thanks a lot."],"a":0,"ex":"함께하겠다는 긍정 승낙이므로 Yes."},{"id":"c5-18","cat":"c5","q":"빈칸: She has a car, ___?","opts":["doesn't she","hasn't she","isn't she"],"a":0,"ex":"has가 일반동사(소유)이면 태그는 does. doesn't she."},{"id":"c5-19","cat":"c5","q":"빈칸: Don't be late, ___?","opts":["will you","won't you","shall you"],"a":0,"ex":"부정 명령문의 태그도 will you."},{"id":"c6-0","cat":"c6","q":"Do you know where ___ ?","opts":["the station is","is the station","does the station is"],"a":0,"ex":"간접의문문은 평서문 어순(주어+동사)이라 the station is가 맞아요."},{"id":"c6-1","cat":"c6","q":"Choose the correct indirect question: Could you tell me ___ ?","opts":["what time is it","what time it is","what time does it be"],"a":1,"ex":"큰 문장 안에서는 what time it is처럼 주어+동사 순서로 써요."},{"id":"c6-2","cat":"c6","q":"Direct: Where does he live? -> Indirect: I want to know where ___ .","opts":["does he live","he lives","he live"],"a":1,"ex":"do/does를 빼고 he lives로 평서문 어순을 씁니다."},{"id":"c6-3","cat":"c6","q":"Yes/No 간접의문문에는 무엇을 쓰나요? Do you know ___ he is coming?","opts":["that","if","what"],"a":1,"ex":"예/아니오 의문문을 넣을 때는 if 또는 whether를 씁니다."},{"id":"c6-4","cat":"c6","q":"Which sentence is correct?","opts":["I wonder if she is at home.","I wonder is she at home.","I wonder that she is at home."],"a":0,"ex":"I wonder 뒤 예/아니오 내용은 if를 쓰고 어순은 평서문이에요."},{"id":"c6-5","cat":"c6","q":"Find the error: Can you tell me where is the bank?","opts":["Can you tell me","where is the bank","No error"],"a":1,"ex":"where the bank is가 맞아요. 간접의문문은 동사를 도치하지 않습니다."},{"id":"c6-6","cat":"c6","q":"'그가 언제 도착하는지 아세요?' 를 영어로: Do you know when ___ ?","opts":["he arrives","does he arrive","arrives he"],"a":0,"ex":"do/does 없이 he arrives로 평서문 어순을 씁니다."},{"id":"c6-7","cat":"c6","q":"Choose the natural indirect question: I am not sure ___ this train stops in Busan.","opts":["that","whether","what"],"a":1,"ex":"예/아니오 여부를 물을 때는 whether(또는 if)를 씁니다."},{"id":"c6-8","cat":"c6","q":"Fix the stray auxiliary: Please tell me what did you buy.","opts":["what did you buy","what you bought","what you did buy"],"a":1,"ex":"과거 의문의 did를 없애고 what you bought로 씁니다."},{"id":"c6-9","cat":"c6","q":"Which is the correct embedded order? Do you remember ___ ?","opts":["where did we park","where we parked","where parked we"],"a":1,"ex":"did를 빼고 where we parked로 주어+동사 순서를 지켜요."},{"id":"c6-10","cat":"c6","q":"'그녀가 시험에 합격했는지 궁금해요.' -> I wonder ___ she passed the exam.","opts":["if","that","which"],"a":0,"ex":"예/아니오 궁금증은 if 또는 whether로 나타냅니다."},{"id":"c6-11","cat":"c6","q":"Choose the correct sentence:","opts":["Could you tell me how much does it cost?","Could you tell me how much it costs?","Could you tell me how much costs it?"],"a":1,"ex":"how much it costs처럼 do를 빼고 평서문 어순을 씁니다."},{"id":"c6-12","cat":"c6","q":"Direct: Is he coming? -> Indirect: I do not know ___ .","opts":["is he coming","if he is coming","that he is coming"],"a":1,"ex":"예/아니오 의문문은 if he is coming으로 바꿉니다."},{"id":"c6-13","cat":"c6","q":"Fill the blank: I asked her ___ the meeting had started.","opts":["what","whether","who"],"a":1,"ex":"회의가 시작했는지(예/아니오)를 물으므로 whether가 자연스러워요."},{"id":"c6-14","cat":"c6","q":"Spot the correct one:","opts":["Do you know who that man is?","Do you know who is that man?","Do you know who that man be?"],"a":0,"ex":"who that man is로 주어+동사 순서를 유지합니다."},{"id":"c6-15","cat":"c6","q":"'화장실이 어디에 있는지 말씀해 주시겠어요?' -> Could you tell me where ___ ?","opts":["the restroom is","is the restroom","does the restroom"],"a":0,"ex":"where the restroom is로 도치 없이 씁니다."},{"id":"c6-16","cat":"c6","q":"Which corrects the inversion error? Tell me why is she late.","opts":["why is she late","why she is late","why she late is"],"a":1,"ex":"why she is late로 동사를 도치하지 않습니다."},{"id":"c6-17","cat":"c6","q":"Choose that vs if/whether: I heard ___ he moved to Seoul, but I am not sure ___ it is true.","opts":["that / whether","whether / that","if / that"],"a":0,"ex":"사실 전달은 that, 예/아니오 불확실함은 whether를 씁니다."},{"id":"c6-18","cat":"c6","q":"Find the error: I wonder does she know the answer.","opts":["I wonder","does she know","the answer"],"a":1,"ex":"does를 빼고 if she knows로 고쳐야 해요."},{"id":"c6-19","cat":"c6","q":"'그가 무엇을 원하는지 아무도 몰라요.' -> Nobody knows what ___ .","opts":["does he want","he wants","wants he"],"a":1,"ex":"what he wants로 do를 빼고 평서문 어순을 씁니다."},{"id":"c7-0","cat":"c7","q":"Report this question: 'Are you ready?' He asked ___","opts":["if I was ready","that I was ready","am I ready"],"a":0,"ex":"Yes/No 의문문은 if/whether + 평서문 어순, 과거로 시제 일치."},{"id":"c7-1","cat":"c7","q":"Report this question: 'Where do you live?' She asked me ___","opts":["where do I live","where I lived","where did I live"],"a":1,"ex":"wh-의문문은 wh-어 + 평서문 어순(주어+동사), do 제거하고 과거로."},{"id":"c7-2","cat":"c7","q":"Report this question: 'What time is it?' He asked ___","opts":["what time was it","what time it was","what time is it"],"a":1,"ex":"wh-어 뒤에는 평서문 어순(it was), is는 was로."},{"id":"c7-3","cat":"c7","q":"Fill in: 'Can you swim?' She asked me ___ swim.","opts":["whether I could","if can I","that I can"],"a":0,"ex":"Yes/No는 whether/if, can은 과거 could로."},{"id":"c7-4","cat":"c7","q":"Report this question: 'Do you like coffee?' He asked ___","opts":["do I like coffee","if I liked coffee","whether do I like coffee"],"a":1,"ex":"Yes/No는 if + 평서문, do는 사라지고 like가 liked로."},{"id":"c7-5","cat":"c7","q":"Which is correct? 'Why are you late?' She asked me ___","opts":["why was I late","why I was late","why I am late"],"a":1,"ex":"wh-어 + 주어+동사 어순, are는 was로 일치."},{"id":"c7-6","cat":"c7","q":"Report this question: 'Will you help me?' He asked ___","opts":["if I would help him","will I help him","if would I help him"],"a":0,"ex":"will은 would로, me는 him으로, if + 평서문 어순."},{"id":"c7-7","cat":"c7","q":"Fill in: 'How old are you?' The man asked how old ___","opts":["was I","I was","am I"],"a":1,"ex":"간접의문문은 주어+동사(I was) 순서."},{"id":"c7-8","cat":"c7","q":"Report this question: 'Did you call her?' She asked ___","opts":["if I had called her","did I call her","that I called her"],"a":0,"ex":"과거 did 의문문은 if + had p.p.로 시제 일치."},{"id":"c7-9","cat":"c7","q":"Spot the error: She asked me where did I work.","opts":["No error","Should be: where I worked","Should be: where do I work"],"a":1,"ex":"간접의문문은 do/did 없이 평서문 어순, work는 worked로."},{"id":"c7-10","cat":"c7","q":"Report this question: 'Who is your teacher?' He asked ___","opts":["who was my teacher","who is my teacher","who my teacher is now"],"a":0,"ex":"your는 my로, is는 was로 시제 일치."},{"id":"c7-11","cat":"c7","q":"Fill in: 'Have you finished?' She asked if I ___ finished.","opts":["have","had","did"],"a":1,"ex":"현재완료 have는 과거완료 had로 시제 일치."},{"id":"c7-12","cat":"c7","q":"Which is correct? 'When will the bus come?' We asked when the bus ___","opts":["will come","would come","comes"],"a":1,"ex":"will은 would로 시제 일치, 평서문 어순."},{"id":"c7-13","cat":"c7","q":"Report this question: 'Is it raining?' He asked ___","opts":["whether it was raining","is it raining","that it was raining"],"a":0,"ex":"Yes/No는 whether/if, is raining은 was raining으로."},{"id":"c7-14","cat":"c7","q":"Spot the error: He asked me if was I tired.","opts":["No error","Should be: if I was tired","Should be: was I tired"],"a":1,"ex":"if 뒤에는 평서문 어순 I was, 의문문 어순 쓰면 안 됨."},{"id":"c7-15","cat":"c7","q":"Report this question: 'What are you doing here?' She asked me what I ___ there.","opts":["am doing","was doing","did do"],"a":1,"ex":"are doing은 was doing으로, here는 there로 변화."},{"id":"c7-16","cat":"c7","q":"Fill in: 'Do they know the answer?' He asked ___ knew the answer.","opts":["whether they","do they","if did they"],"a":0,"ex":"Yes/No는 whether + 주어(they), do 없애고 know는 knew로."},{"id":"c7-17","cat":"c7","q":"Which is the correct reported form of 'Where did you go yesterday?'","opts":["She asked where I went the day before","She asked where did I go yesterday","She asked where I go yesterday"],"a":0,"ex":"평서문 어순 I went, did 제거, yesterday는 the day before로 변화."},{"id":"c8-0","cat":"c8","q":"빈칸에 알맞은 것은? What are you ___?","opts":["looking for","looking","for looking"],"a":0,"ex":"look for (~을 찾다)의 목적어를 물으면 전치사 for가 문장 끝에 남습니다."},{"id":"c8-1","cat":"c8","q":"누구와 함께 갔는지 묻는 자연스러운 문장은?","opts":["With who did you go?","Who did you go with?","Who with did you go?"],"a":1,"ex":"구어체에서는 전치사 with를 문장 끝으로 보냅니다: Who did you go with?"},{"id":"c8-2","cat":"c8","q":"빈칸: Where are you ___? (출신을 물음)","opts":["from","of","with"],"a":0,"ex":"be from은 출신을 나타냅니다. Where are you from?"},{"id":"c8-3","cat":"c8","q":"빈칸: What is this table made ___? (재료)","opts":["for","of","with"],"a":1,"ex":"재료를 물을 때는 be made of를 씁니다."},{"id":"c8-4","cat":"c8","q":"빈칸: Who is this present ___? (누구를 위한 것인지)","opts":["for","with","about"],"a":0,"ex":"for는 대상을 나타냅니다: Who is this present for?"},{"id":"c8-5","cat":"c8","q":"'그녀는 어떤 사람이야?'에 해당하는 문장은?","opts":["What does she like?","What is she like?","How does she like?"],"a":1,"ex":"What ... like?는 성격이나 특징 설명을 요청합니다. What does she like?는 무엇을 좋아하는지 묻는 뜻입니다."},{"id":"c8-6","cat":"c8","q":"제안: ___ going to the beach this weekend?","opts":["How about","How much","What for"],"a":0,"ex":"How about + 동명사(-ing)는 제안 표현입니다."},{"id":"c8-7","cat":"c8","q":"빈칸: ___ a cup of coffee? (제안)","opts":["What for","What about","What like"],"a":1,"ex":"What about + 명사도 제안이나 의견을 물을 때 씁니다."},{"id":"c8-8","cat":"c8","q":"'그 사다리는 무엇에 쓰는 거야?'의 올바른 표현은?","opts":["What is the ladder for?","For what is the ladder?","What for the ladder is?"],"a":0,"ex":"What ... for?는 용도나 이유(=why)를 물으며 for가 끝에 옵니다."},{"id":"c8-9","cat":"c8","q":"단어 배열: (are / what / talking / you / about)?","opts":["What about are you talking?","What are you talking about?","About what are you talking?"],"a":1,"ex":"talk about의 about을 문장 끝으로 보냅니다."},{"id":"c8-10","cat":"c8","q":"빈칸: What are you afraid ___?","opts":["of","for","with"],"a":0,"ex":"be afraid of의 of가 의문문에서 문장 끝에 남습니다."},{"id":"c8-11","cat":"c8","q":"틀린 부분을 고친 문장은? (원문: From where are you?)","opts":["Where you are from?","Where are you from?","Where from are you?"],"a":1,"ex":"자연스러운 형태는 Where are you from?입니다."},{"id":"c8-12","cat":"c8","q":"제안하기: ___ watching a movie tonight?","opts":["What about","What is","What for"],"a":0,"ex":"What about + -ing로 제안할 수 있습니다."},{"id":"c8-13","cat":"c8","q":"'날씨가 어때?'를 뜻하는 문장은?","opts":["What is the weather like?","How is the weather like?","What does the weather like?"],"a":0,"ex":"What ... like?로 상태나 특징을 물으며 like를 끝에 둡니다. How ... like?는 틀린 형태입니다."},{"id":"c8-14","cat":"c8","q":"빈칸: Who did you speak ___ on the phone?","opts":["to","of","about"],"a":0,"ex":"speak to someone의 to가 문장 끝에 옵니다."},{"id":"c8-15","cat":"c8","q":"다음 중 문법적으로 올바른 문장은?","opts":["What are you waiting for?","What for are you waiting?","For what you are waiting?"],"a":0,"ex":"wait for의 for를 끝에 두는 것이 자연스럽습니다."},{"id":"c8-16","cat":"c8","q":"빈칸: A: I am going shopping. B: ___ you? (같이 갈래?의 되묻기 제안)","opts":["What about","What like","What for"],"a":0,"ex":"What about you?는 상대에게 되묻거나 제안할 때 씁니다."},{"id":"c8-17","cat":"c8","q":"'이 열쇠는 무엇에 쓰는 거야?'를 이유/용도로 묻는 문장은?","opts":["What is this key for?","What is this key like?","What is this key of?"],"a":0,"ex":"What ... for?는 용도(=why)를 묻고, What ... like?는 특징을 묻습니다."},{"id":"c9-0","cat":"c9","q":"I can't decide what ___ for dinner tonight.","opts":["to cook","cooking","cook"],"a":0,"ex":"의문사 what 뒤에는 to부정사(what to cook) 형태로 씁니다."},{"id":"c9-1","cat":"c9","q":"She doesn't know where ___ during the holidays.","opts":["going","to go","goes"],"a":1,"ex":"where + to부정사: 어디로 갈지."},{"id":"c9-2","cat":"c9","q":"Can you show me how ___ this machine?","opts":["to use","using","use"],"a":0,"ex":"how + to부정사: 어떻게 사용하는지."},{"id":"c9-3","cat":"c9","q":"'가야 할지 말지 모르겠어.' = I don't know ___ to go or not.","opts":["what","whether","which"],"a":1,"ex":"whether + to부정사: 할지 말지를 나타냅니다."},{"id":"c9-4","cat":"c9","q":"We weren't sure ___ to say to comfort her.","opts":["what","how","where"],"a":0,"ex":"무엇을 말해야 할지: what to say."},{"id":"c9-5","cat":"c9","q":"He asked me ___ to get to the station.","opts":["what","how","who"],"a":1,"ex":"길·방법을 물을 때 how to get there."},{"id":"c9-6","cat":"c9","q":"Which of these is a correct choice question?","opts":["Would you like tea or coffee?","Do you like tea coffee?","You want tea and coffee too?"],"a":0,"ex":"선택의문문은 A or B 형태로 묻습니다."},{"id":"c9-7","cat":"c9","q":"A: Would you like tea or coffee? Choose the most natural answer.","opts":["Yes, I would.","Coffee, please.","No, thanks."],"a":1,"ex":"선택의문문에는 Yes/No가 아니라 하나를 골라 답합니다."},{"id":"c9-8","cat":"c9","q":"In 'Should we go now or later?', the choice question usually rises on ___ and falls on ___.","opts":["later, now","now, later","neither word"],"a":1,"ex":"보통 앞 항목은 올려 읽고 마지막 항목은 내려 읽습니다."},{"id":"c9-9","cat":"c9","q":"A: Do you want to eat in or eat out? B: ___","opts":["Yes, I do.","Let's eat out.","No, I don't want.","Eat in or out."],"a":1,"ex":"선택지 중 하나를 골라 답해야 자연스럽습니다."},{"id":"c9-10","cat":"c9","q":"A: I just quit my job. B: You did ___?","opts":["what","how","which"],"a":0,"ex":"놀라며 되물을 때 You did what? 를 씁니다."},{"id":"c9-11","cat":"c9","q":"A: I passed the exam! B: ___ Congratulations!","opts":["Really?","What for?","Do you?"],"a":0,"ex":"Really? 는 놀람·맞장구로 자연스럽습니다."},{"id":"c9-12","cat":"c9","q":"A: I love spicy food. Pick the natural short follow-up. B: ___","opts":["Do you?","Are you?","Did you?"],"a":0,"ex":"일반동사(love) 문장에는 Do you? 로 되묻습니다."},{"id":"c9-13","cat":"c9","q":"A: She is a doctor now. B: Oh, ___ she?","opts":["does","is","did"],"a":1,"ex":"be동사(is) 문장에는 is she? 로 되묻습니다."},{"id":"c9-14","cat":"c9","q":"A: I had a great weekend. How ___ you?","opts":["about","for","of"],"a":0,"ex":"상대에게 되물을 때 How about you? 를 씁니다."},{"id":"c9-15","cat":"c9","q":"'너는 어때?' 를 자연스럽게 옮긴 것은?","opts":["What about you?","What with you?","How with you?"],"a":0,"ex":"What about you? 도 상대의 의견을 되묻는 표현입니다."},{"id":"c9-16","cat":"c9","q":"Find the error: 'I don't know what do next.'","opts":["what do","don't know","next"],"a":0,"ex":"의문사 뒤에는 what to do 처럼 to부정사를 씁니다."},{"id":"c9-17","cat":"c9","q":"Fix the reply. A: I broke my phone. B: 'You broke what it?' Choose the correct form.","opts":["You broke what?","You broke it what?","What you broke?"],"a":0,"ex":"되물을 때는 You broke what? 어순이 맞습니다."}]</script>
+<script>
+const CHAPTERS = JSON.parse(document.getElementById("chapterData").textContent);
+const QBANK = JSON.parse(document.getElementById("qbankData").textContent);
+const CAT_LABELS = {
+  c1:"Yes/No 의문문", c2:"Wh- 의문사", c3:"How 의문문", c4:"주어·목적어 의문문",
+  c5:"부정·부가의문문", c6:"간접의문문", c7:"전달 의문문(화법)", c8:"전치사·What about", c9:"의문사+to·선택·되묻기"
+};
+const CAT_ORDER = ["c1","c2","c3","c4","c5","c6","c7","c8","c9"];
+
+document.getElementById("chTotal").textContent = CHAPTERS.length;
+
+const KEY="qmaster_v1";
+let store={read:{},wrong:[]};
+try{ store = Object.assign(store, JSON.parse(localStorage.getItem(KEY))||{}); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+const app = document.getElementById("app");
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+let voices=[]; function lv(){ voices = window.speechSynthesis?speechSynthesis.getVoices():[]; }
+if(window.speechSynthesis){ lv(); speechSynthesis.onvoiceschanged=lv; }
+function speak(t,rate=0.95){ if(!window.speechSynthesis)return; speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=rate;
+  const v=voices.find(v=>/en-US/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang)); if(v)u.voice=v; speechSynthesis.speak(u); }
+
+function refreshProg(){
+  const d=Object.keys(store.read).filter(k=>store.read[k]).length;
+  document.getElementById("chDone").textContent=d;
+  document.getElementById("progFill").style.width=(d/CHAPTERS.length*100)+"%";
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- HOME ---------- */
+function home(){
+  refreshProg();
+  const chItems = CHAPTERS.map((c,i)=>`
+    <div class="ch-item ${store.read[c.id]?'done':''}" onclick="reader(${i})">
+      <div class="ch-num">${i+1}</div>
+      <div class="ch-meta"><div class="t">${c.title}</div><div class="e">${c.en}</div></div>
+      <div class="ch-chk">✓</div>
+    </div>`).join("");
+  const wrongN = store.wrong.length;
+  app.innerHTML = `
+    <div class="hero">
+      <p class="eyebrow">Master English Questions</p>
+      <h2>의문문, 정말 못 하는 질문이 없도록</h2>
+      <p>10개 챕터로 모든 유형을 익히고, ${QBANK.length}개 문제로 완벽하게 연습해요. 틀린 문제는 자동으로 오답노트에 모입니다.</p>
+      <div class="stats">
+        <div class="stat"><div class="n">${CHAPTERS.length}</div><div class="l">학습 챕터</div></div>
+        <div class="stat"><div class="n acc">${QBANK.length}</div><div class="l">연습 문제</div></div>
+        <div class="stat"><div class="n">${CAT_ORDER.length}</div><div class="l">유형</div></div>
+      </div>
+    </div>
+    <div class="sec-label"><h3>📖 학습 챕터</h3><span class="rule"></span></div>
+    <div class="ch-list">${chItems}</div>
+    <div class="sec-label"><h3>✏️ 퀴즈</h3><span class="rule"></span></div>
+    <div class="modes">
+      <button class="mode wide primary-hint" onclick="startTest()" style="border-color:var(--accent)">
+        <div class="mi">🎯</div><div class="mt">종합 테스트 (랜덤 20문제)</div>
+        <div class="md">모든 유형에서 무작위 20문제 · 끝나면 점수와 오답 리뷰</div></button>
+      <button class="mode" onclick="drillMenu()"><div class="mi">🗂️</div><div class="mt">유형별 연습</div><div class="md">9개 유형 골라서 집중 훈련</div></button>
+      <button class="mode" onclick="startWrong()" ${wrongN?'':'disabled'}><div class="mi">🔁</div><div class="mt">오답 다시풀기</div><div class="md">${wrongN?wrongN+'문제 대기 중':'아직 없음'}</div></button>
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- READER ---------- */
+function reader(i){
+  const c = CHAPTERS[i];
+  const pats = (c.patterns||[]).map(p=>`<div class="pat"><div class="pe">${p.en}</div><div class="pk">${p.ko}</div></div>`).join("");
+  const exs = (c.examples||[]).map(e=>`
+    <div class="ex-row"><div class="et"><div class="ee">${e.en}</div><div class="ek">${e.ko}</div></div>
+      <button class="say" onclick="speak('${esc(e.en)}')">🔊</button></div>`).join("");
+  app.innerHTML = `
+    <button class="back" onclick="home()">← 목차</button>
+    <div class="ch-head"><span class="u-tag">CHAPTER ${i+1} / ${CHAPTERS.length}</span></div>
+    <h2 class="ch-title">${c.title}</h2>
+    <p class="ch-sub">${c.en}</p>
+    <div class="box"><h4>개념</h4><p class="lead">${c.intro}</p></div>
+    <div class="box"><h4>핵심 패턴</h4>${pats}</div>
+    <div class="box"><h4>예문 듣기</h4>${exs}</div>
+    <div class="box"><div class="tip"><span class="th">이것만은!</span>${c.tip}</div></div>
+    <button class="btn primary" style="width:100%;margin-bottom:12px" onclick="markRead('${c.id}')">✓ 이 챕터 학습 완료</button>
+    <div class="ch-nav">
+      <button class="btn" ${i===0?'disabled':''} onclick="reader(${i-1})">← 이전 챕터</button>
+      <button class="btn" ${i===CHAPTERS.length-1?'disabled':''} onclick="reader(${i+1})">다음 챕터 →</button>
+    </div>`;
+  window.scrollTo(0,0);
+}
+function markRead(id){ store.read[id]=true; save(); home(); }
+
+/* ---------- DRILL MENU ---------- */
+function drillMenu(){
+  const rows = CAT_ORDER.map(k=>{
+    const n = QBANK.filter(q=>q.cat===k).length;
+    return `<div class="ch-item" onclick="startCat('${k}')">
+      <div class="ch-num">▷</div>
+      <div class="ch-meta"><div class="t">${CAT_LABELS[k]}</div><div class="e">${n}문제</div></div>
+      <div class="ch-chk" style="border:none;color:var(--faint)">›</div></div>`;
+  }).join("");
+  app.innerHTML = `<button class="back" onclick="home()">← 홈</button>
+    <h2 class="ch-title" style="font-size:22px">🗂️ 유형별 연습</h2>
+    <p class="ch-sub">한 유형을 골라 집중적으로 훈련하세요.</p>
+    <div class="ch-list" style="margin-top:12px">${rows}</div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- QUIZ RUNNER ---------- */
+let Q={list:[],i:0,score:0,wrong:[],title:"",answered:false};
+function startCat(k){ runQuiz(shuffle(QBANK.filter(q=>q.cat===k)), CAT_LABELS[k]); }
+function startTest(){ runQuiz(shuffle(QBANK).slice(0,20), "종합 테스트"); }
+function startWrong(){
+  const set=new Set(store.wrong);
+  const list=QBANK.filter(q=>set.has(q.id));
+  if(!list.length){ home(); return; }
+  runQuiz(shuffle(list), "오답 다시풀기");
+}
+function runQuiz(list,title){ Q={list,i:0,score:0,wrong:[],title,answered:false}; renderQ(); }
+function renderQ(){
+  if(Q.i>=Q.list.length){ return renderResult(); }
+  const q=Q.list[Q.i], n=Q.list.length;
+  Q.answered=false;
+  const opts=q.opts.map((o,oi)=>`<button class="opt" id="opt${oi}" onclick="pick(${oi})">${o}</button>`).join("");
+  app.innerHTML=`<button class="back" onclick="home()">← 홈 (그만두기)</button>
+    <div class="q-top"><div class="qbar"><div class="qfill" id="qfill" style="width:${(Q.i)/n*100}%"></div></div>
+      <span class="qmeta">${Q.i+1} / ${n} · ✓${Q.score}</span></div>
+    <div class="q-cat">${Q.title} · ${CAT_LABELS[q.cat]||''}</div>
+    <div class="q-text">${String(q.q).replace(/___/g,'<span class="blank">____</span>')}</div>
+    <div id="opts">${opts}</div>
+    <div class="explain" id="exp">💡 ${q.ex}</div>
+    <div class="q-actions"><button class="btn primary" id="nextBtn" style="display:none" onclick="nextQ()">${Q.i===n-1?'결과 보기 →':'다음 →'}</button></div>`;
+  window.scrollTo(0,0);
+}
+function pick(oi){
+  if(Q.answered) return; Q.answered=true;
+  const q=Q.list[Q.i], correct=q.a;
+  document.querySelectorAll(".opt").forEach((b,i)=>{ b.disabled=true;
+    if(i===correct)b.classList.add("correct");
+    if(i===oi&&oi!==correct)b.classList.add("wrong"); });
+  document.getElementById("exp").classList.add("show");
+  document.getElementById("nextBtn").style.display="inline-block";
+  const ok = oi===correct;
+  if(ok){ Q.score++; store.wrong = store.wrong.filter(x=>x!==q.id); }
+  else { Q.wrong.push({q, chosen:oi}); if(!store.wrong.includes(q.id)) store.wrong.push(q.id); }
+  save();
+  const qf=document.getElementById("qfill"); if(qf) qf.style.width=((Q.i+1)/Q.list.length*100)+"%";
+}
+function nextQ(){ Q.i++; renderQ(); }
+function renderResult(){
+  const n=Q.list.length, pct=Math.round(Q.score/n*100);
+  const msg = pct===100?'완벽해요! 🎉 못 푸는 질문이 없네요.':pct>=80?'훌륭해요! 👏 거의 다 왔어요.':pct>=60?'좋아요 👍 오답을 다시 보면 확실해져요.':'괜찮아요 💪 오답노트로 복습해요.';
+  const rev = Q.wrong.length ? `<div class="rev"><div class="rh">틀린 문제 다시 보기 (${Q.wrong.length})</div>`+
+    Q.wrong.map(w=>`<div class="rev-item">
+      <div class="rq">${String(w.q.q).replace(/___/g,'____')}</div>
+      <div class="ra">정답: <span class="ok">${w.q.opts[w.q.a]}</span> · 내 답: ${w.q.opts[w.chosen]}</div>
+      <div class="rx">💡 ${w.q.ex}</div></div>`).join("")+`</div>` : `<p class="ch-sub" style="text-align:center">전부 맞혔어요! 오답이 없습니다 🙌</p>`;
+  app.innerHTML=`<button class="back" onclick="home()">← 홈</button>
+    <div class="box"><div class="result">
+      <div class="big">${Q.score} / ${n}</div><div class="msg">${msg}</div>
+      <div class="result-btns">
+        ${Q.wrong.length?`<button class="btn primary" onclick="runQuiz(shuffle([${Q.wrong.map(w=>JSON.stringify(w.q.id)).join(',')}].map(id=>QBANK.find(q=>q.id===id))),'오답 다시풀기')">🔁 틀린 것만 다시</button>`:''}
+        <button class="btn" onclick="home()">홈으로</button>
+      </div>
+    </div>${rev}</div>`;
+  window.scrollTo(0,0);
+}
+
+home();
+</script>
+</body>
+</html>
